@@ -17,7 +17,7 @@ A React + TypeScript application that searches for Rick and Morty characters usi
 ## 📦 Installation
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/barmenski/REACT2025Q3.git
 cd rs-react-app
 npm install
 ```
