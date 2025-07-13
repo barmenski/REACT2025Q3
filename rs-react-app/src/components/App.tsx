@@ -1,10 +1,13 @@
 import React from 'react';
 import SearchInput from './SearchInput/SearchInput';
-import Item from './Item/Item';
+import ItemList from './ItemList/ItemList';
 import Header from './Header/Header';
+import Loader from './Loader/Loader';
+import ErrorDescription from './ErrorDescription/ErrorDescription';
+import ErrorButton from './ErrorButton/ErrorButton';
 import './App.css';
 
-type Character = {
+export type Character = {
   id: number;
   name: string;
   image: string;
@@ -28,6 +31,9 @@ type AppState = {
   prevPageUrl: string | null;
   page: number;
   totalPages: number;
+  loading: boolean;
+  error: string | null;
+  forceRenderError: boolean;
 };
 
 class App extends React.Component<object, AppState> {
@@ -42,6 +48,9 @@ class App extends React.Component<object, AppState> {
       prevPageUrl: null,
       page: 1,
       totalPages: 1,
+      loading: false,
+      error: null,
+      forceRenderError: false,
     };
 
     this.handleSearch = this.handleSearch.bind(this);
@@ -49,6 +58,7 @@ class App extends React.Component<object, AppState> {
     this.loadPage = this.loadPage.bind(this);
     this.handleNextPage = this.handleNextPage.bind(this);
     this.handlePrevPage = this.handlePrevPage.bind(this);
+    this.triggerTestError = this.triggerTestError.bind(this);
   }
 
   componentDidMount() {
@@ -85,9 +95,25 @@ class App extends React.Component<object, AppState> {
     this.loadPage(url, 1);
   }
 
+  triggerTestError() {
+    this.setState({ forceRenderError: true });
+  }
+
   loadPage(url: string, page: number) {
+    this.setState({ loading: true, error: null });
     fetch(url)
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('404: Персонажи не найдены');
+          }
+          if (response.status === 503) {
+            throw new Error('503: Сервис временно недоступен');
+          }
+          throw new Error(`${response.status}: Ошибка сервера`);
+        }
+        return response.json();
+      })
       .then((data: ApiResponse) => {
         if (data.results && data.results.length > 0) {
           this.setState({
@@ -95,8 +121,10 @@ class App extends React.Component<object, AppState> {
             currentPageUrl: url,
             nextPageUrl: data.info.next,
             prevPageUrl: data.info.prev,
-            page: page,
+            page,
             totalPages: data.info.pages,
+            loading: false,
+            error: null,
           });
         } else {
           this.setState({
@@ -105,6 +133,8 @@ class App extends React.Component<object, AppState> {
             prevPageUrl: null,
             page: 1,
             totalPages: 1,
+            loading: false,
+            error: 'Персонажи не найдены',
           });
         }
       })
@@ -116,6 +146,8 @@ class App extends React.Component<object, AppState> {
           prevPageUrl: null,
           page: 1,
           totalPages: 1,
+          loading: false,
+          error: err.message || 'Ошибка загрузки',
         });
       });
   }
@@ -136,26 +168,20 @@ class App extends React.Component<object, AppState> {
     return (
       <div className="wrapper-main">
         <Header />
-        <div>
-          <SearchInput
-            onSearch={this.handleSearch}
-            value={this.state.currentQuery}
-            onChange={this.handleQueryChange}
-          />
-        </div>
-        <div>
-          {this.state.results.length > 0 ? (
+        <SearchInput
+          onSearch={this.handleSearch}
+          value={this.state.currentQuery}
+          onChange={this.handleQueryChange}
+        />
+        <div className="result">
+          {this.state.forceRenderError &&
+            (() => {
+              throw new Error('Тестовая ошибка рендера');
+            })()}
+          {this.state.loading && <Loader />}
+          {!this.state.loading && this.state.results.length > 0 ? (
             <>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-                {this.state.results.map((character) => (
-                  <Item
-                    key={character.id}
-                    name={character.name}
-                    image={character.image}
-                  />
-                ))}
-              </div>
-
+              <ItemList results={this.state.results} />
               <div style={{ marginTop: '16px' }}>
                 <button
                   onClick={this.handlePrevPage}
@@ -174,10 +200,10 @@ class App extends React.Component<object, AppState> {
                 </button>
               </div>
             </>
-          ) : (
-            <p style={{ marginTop: '20px' }}>Нет результатов</p>
-          )}
+          ) : null}
         </div>
+        {this.state.error && <ErrorDescription message={this.state.error} />}
+        <ErrorButton onError={this.triggerTestError} />
       </div>
     );
   }

@@ -9,9 +9,9 @@ class Item extends React.Component<ItemProps> {
   render() {
     const { name, image } = this.props;
     return (
-      <div>
-        <p>{this.props.name}</p>
-        {image && <img src={image} alt={name} />}
+      <div className="item">
+        <p className="item-name">{this.props.name}</p>
+        {image && <img className="item-img" src={image} alt={name} />}
       </div>
     );
   }
