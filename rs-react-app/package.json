@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "format:fix": "prettier --write .",
     "prepare": "husky",
-    "postinstall": "cd .. && husky install"
+    "postinstall": "cd .. && husky install && cd rs-react-app"
   },
   "dependencies": {
     "react": "^19.1.0",
