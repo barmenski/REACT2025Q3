@@ -5,21 +5,16 @@ import react from '@vitejs/plugin-react';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/REACT2025Q3/',
+  base: './',
   test: {
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/setup.ts',
     coverage: {
       provider: 'v8',
-      include: ['src//*.{js,jsx,ts,tsx}'],
-      exclude: [
-        'src//.test.{js,jsx,ts,tsx}',
-        'src/**/.spec.{js,jsx,ts,tsx}',
-        'src/index.{js,jsx,ts,tsx}',
-        'src/setupTests.{js,ts}',
-        'src/*/.d.ts',
-      ],
+      reporter: ['text', 'html', 'json'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['**/*.d.ts', '**/*.test.{ts,tsx}'],
       thresholds: {
         statements: 80,
         branches: 50,
