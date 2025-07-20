@@ -62,3 +62,58 @@ describe('App', () => {
     });
   });
 });
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe('App display error', () => {
+  it('displays error message when API call fails with 404', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      })
+    );
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/персонажи не найдены/i)).toBeInTheDocument();
+    });
+  });
+
+  it('displays error message when API is unavailable (503)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 503,
+        json: async () => ({}),
+      })
+    );
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/сервис временно недоступен/i)
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('displays generic error message on unexpected error', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockRejectedValue(new Error('Network error'))
+    );
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/network error/i)).toBeInTheDocument();
+    });
+  });
+});

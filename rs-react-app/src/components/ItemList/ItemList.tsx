@@ -8,9 +8,10 @@ type ItemListProps = {
 
 class ItemList extends React.Component<ItemListProps> {
   render() {
+    const results = this.props.results || [];
     return (
       <div className="item-list">
-        {this.props.results.map((character) => (
+        {results.map((character) => (
           <Item
             key={character.id}
             name={character.name}

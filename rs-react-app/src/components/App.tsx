@@ -168,7 +168,7 @@ class App extends React.Component<object, AppState> {
             (() => {
               throw new Error('Тестовая ошибка рендера');
             })()}
-          {this.state.loading && <Loader />}
+          <Loader loading={this.state.loading} />
           {!this.state.loading && this.state.results.length > 0 ? (
             <>
               <ItemList results={this.state.results} />
@@ -193,7 +193,7 @@ class App extends React.Component<object, AppState> {
           ) : null}
         </div>
         {this.state.error && <ErrorDescription message={this.state.error} />}
-        <ErrorButton onError={this.triggerTestError} />
+        <ErrorButton />
       </div>
     );
   }

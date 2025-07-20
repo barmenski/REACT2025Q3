@@ -11,7 +11,8 @@
     "format:fix": "prettier --write .",
     "prepare": "husky",
     "postinstall": "cd .. && husky install && cd rs-react-app",
-    "test": "vitest"
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "react": "^19.1.0",
