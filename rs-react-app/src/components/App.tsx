@@ -66,6 +66,9 @@ class App extends React.Component<object, AppState> {
     if (savedQuery) {
       this.setState({ currentQuery: savedQuery });
       this.handleSearch(savedQuery);
+    } else {
+      this.setState({ currentQuery: '' });
+      this.handleSearch('');
     }
   }
 
@@ -75,19 +78,6 @@ class App extends React.Component<object, AppState> {
 
   handleSearch(queryRaw: string) {
     const query = queryRaw.trim();
-
-    if (!query) {
-      localStorage.removeItem('lastQuery');
-      this.setState({
-        results: [],
-        currentQuery: '',
-        nextPageUrl: null,
-        prevPageUrl: null,
-        page: 1,
-        totalPages: 1,
-      });
-      return;
-    }
 
     localStorage.setItem('lastQuery', query);
 
