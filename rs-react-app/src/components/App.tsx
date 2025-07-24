@@ -66,6 +66,9 @@ class App extends React.Component<object, AppState> {
     if (savedQuery) {
       this.setState({ currentQuery: savedQuery });
       this.handleSearch(savedQuery);
+    } else {
+      this.setState({ currentQuery: '' });
+      this.handleSearch('');
     }
   }
 
@@ -75,19 +78,6 @@ class App extends React.Component<object, AppState> {
 
   handleSearch(queryRaw: string) {
     const query = queryRaw.trim();
-
-    if (!query) {
-      localStorage.removeItem('lastQuery');
-      this.setState({
-        results: [],
-        currentQuery: '',
-        nextPageUrl: null,
-        prevPageUrl: null,
-        page: 1,
-        totalPages: 1,
-      });
-      return;
-    }
 
     localStorage.setItem('lastQuery', query);
 
@@ -178,7 +168,7 @@ class App extends React.Component<object, AppState> {
             (() => {
               throw new Error('Тестовая ошибка рендера');
             })()}
-          {this.state.loading && <Loader />}
+          <Loader loading={this.state.loading} />
           {!this.state.loading && this.state.results.length > 0 ? (
             <>
               <ItemList results={this.state.results} />
@@ -203,7 +193,7 @@ class App extends React.Component<object, AppState> {
           ) : null}
         </div>
         {this.state.error && <ErrorDescription message={this.state.error} />}
-        <ErrorButton onError={this.triggerTestError} />
+        <ErrorButton />
       </div>
     );
   }

@@ -13,6 +13,7 @@ A React + TypeScript application that searches for Rick and Morty characters usi
 - LocalStorage to save last query
 - ErrorBoundary for graceful error fallback
 - Husky pre-commit hook and ESLint integration
+- Husky pre-push hook and Vitest integration
 
 ## 📦 Installation
 
@@ -49,6 +50,16 @@ To run lint and check code style before commit:
 ```bash
 cd ./rs-react-app
 npm run lint
+```
+
+## Testing
+
+To run test and see test coverage:
+
+```bash
+cd ./rs-react-app
+npm run test
+npm run test:coverage
 ```
 
 ## 📝 Committing changes
