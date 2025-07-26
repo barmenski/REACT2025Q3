@@ -6,22 +6,8 @@ import Loader from './Loader/Loader';
 import ErrorDescription from './ErrorDescription/ErrorDescription';
 import ErrorButton from './ErrorButton/ErrorButton';
 import './App.css';
-
-export type Character = {
-  id: number;
-  name: string;
-  image: string;
-};
-
-type ApiResponse = {
-  info: {
-    count: number;
-    pages: number;
-    next: string | null;
-    prev: string | null;
-  };
-  results: Character[];
-};
+import { CharacterService } from './CharacterService/CharacterService';
+import type { Character } from '../types';
 
 type AppState = {
   results: Character[];
@@ -37,9 +23,11 @@ type AppState = {
 };
 
 class App extends React.Component<object, AppState> {
+  private service: CharacterService;
+
   constructor(props: object) {
     super(props);
-
+    this.service = new CharacterService();
     this.state = {
       results: [],
       currentQuery: '',
@@ -62,14 +50,9 @@ class App extends React.Component<object, AppState> {
   }
 
   componentDidMount() {
-    const savedQuery = localStorage.getItem('lastQuery');
-    if (savedQuery) {
-      this.setState({ currentQuery: savedQuery });
-      this.handleSearch(savedQuery);
-    } else {
-      this.setState({ currentQuery: '' });
-      this.handleSearch('');
-    }
+    const savedQuery = this.service.loadLastQuery();
+    this.setState({ currentQuery: savedQuery });
+    this.handleSearch(savedQuery);
   }
 
   handleQueryChange(newQuery: string) {
@@ -78,66 +61,60 @@ class App extends React.Component<object, AppState> {
 
   handleSearch(queryRaw: string) {
     const query = queryRaw.trim();
-
-    localStorage.setItem('lastQuery', query);
-
-    const url = `https://rickandmortyapi.com/api/character/?name=${encodeURIComponent(query)}`;
-    this.loadPage(url, 1);
-  }
-
-  triggerTestError() {
-    this.setState({ forceRenderError: true });
-  }
-
-  loadPage(url: string, page: number) {
+    this.service.saveQuery(query);
     this.setState({ loading: true, error: null });
-    fetch(url)
-      .then((response) => {
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('404: Персонажи не найдены');
-          }
-          if (response.status === 503) {
-            throw new Error('503: Сервис временно недоступен');
-          }
-          throw new Error(`${response.status}: Ошибка сервера`);
-        }
-        return response.json();
-      })
-      .then((data: ApiResponse) => {
-        if (data.results && data.results.length > 0) {
-          this.setState({
-            results: data.results,
-            currentPageUrl: url,
-            nextPageUrl: data.info.next,
-            prevPageUrl: data.info.prev,
-            page,
-            totalPages: data.info.pages,
-            loading: false,
-            error: null,
-          });
-        } else {
-          this.setState({
-            results: [],
-            nextPageUrl: null,
-            prevPageUrl: null,
-            page: 1,
-            totalPages: 1,
-            loading: false,
-            error: 'Персонажи не найдены',
-          });
-        }
+
+    this.service
+      .fetchCharacters(query)
+      .then((data) => {
+        this.setState({
+          results: data.results,
+          currentPageUrl: `${this.service.baseUrl}?name=${encodeURIComponent(query)}`,
+          nextPageUrl: data.info.next,
+          prevPageUrl: data.info.prev,
+          page: 1,
+          totalPages: data.info.pages,
+          loading: false,
+        });
       })
       .catch((err) => {
-        console.error(err);
         this.setState({
           results: [],
+          loading: false,
+          error: err.message,
           nextPageUrl: null,
           prevPageUrl: null,
           page: 1,
           totalPages: 1,
+        });
+      });
+  }
+
+  loadPage(url: string, page: number) {
+    this.setState({ loading: true, error: null });
+
+    this.service
+      .fetchFromUrl(url)
+      .then((data) => {
+        this.setState({
+          results: data.results,
+          currentPageUrl: url,
+          nextPageUrl: data.info.next,
+          prevPageUrl: data.info.prev,
+          page,
+          totalPages: data.info.pages,
           loading: false,
-          error: err.message || 'Ошибка загрузки',
+        });
+      })
+      .catch((err) => {
+        this.setState({
+          results: [],
+          loading: false,
+          error: err.message,
+          nextPageUrl: null,
+          prevPageUrl: null,
+          page: 1,
+          totalPages: 1,
         });
       });
   }
@@ -152,6 +129,10 @@ class App extends React.Component<object, AppState> {
     if (this.state.prevPageUrl) {
       this.loadPage(this.state.prevPageUrl, this.state.page - 1);
     }
+  }
+
+  triggerTestError() {
+    this.setState({ forceRenderError: true });
   }
 
   render() {
