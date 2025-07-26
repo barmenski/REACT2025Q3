@@ -1,6 +1,6 @@
 import React from 'react';
 import Item from '../Item/Item';
-import type { Character } from './../App';
+import type { Character } from '../../types';
 
 type ItemListProps = {
   results: Character[];
