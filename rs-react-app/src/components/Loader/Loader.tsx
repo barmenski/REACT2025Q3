@@ -1,16 +1,10 @@
-import React from 'react';
-
-interface LoaderProps {
+type LoaderProps = {
   loading?: boolean;
-}
+};
 
-class Loader extends React.Component<LoaderProps> {
-  render() {
-    if (!this.props.loading) {
-      return null;
-    }
-    return <div className="loader">⏳ Загрузка...</div>;
+export default function Loader(props: LoaderProps) {
+  if (!props.loading) {
+    return null;
   }
+  return <div className="loader">⏳ Загрузка...</div>;
 }
-
-export default Loader;
