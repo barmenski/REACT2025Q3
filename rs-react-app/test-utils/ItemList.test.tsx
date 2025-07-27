@@ -1,55 +1,61 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
-import Item from '../src/components/Item/Item';
+import userEvent from '@testing-library/user-event';
 import ItemList from '../src/components/ItemList/ItemList';
-import type { Character } from '../src/components/App';
+import { describe, it, vi } from 'vitest';
 
-describe('Item component', () => {
-  it('correctly displays item name and image', () => {
-    render(<Item name="Rick Sanchez" image="https://example.com/rick.png" />);
-
-    expect(screen.getByText('Rick Sanchez')).toBeInTheDocument();
-
-    const img = screen.getByRole('img') as HTMLImageElement;
-    expect(img).toBeInTheDocument();
-    expect(img.src).toContain('https://example.com/rick.png');
-    expect(img.alt).toBe('Rick Sanchez');
-  });
-
-  it('handles missing image gracefully', () => {
-    render(<Item name="Morty Smith" image="" />);
-
-    expect(screen.getByText('Morty Smith')).toBeInTheDocument();
-    expect(screen.queryByRole('img')).not.toBeInTheDocument();
-  });
-});
-
-describe('ItemList component', () => {
-  const characters: Character[] = [
-    { id: 1, name: 'Rick Sanchez', image: 'https://example.com/rick.png' },
-    { id: 2, name: 'Morty Smith', image: '' },
+describe('<ItemList />', () => {
+  const results = [
+    {
+      id: 1,
+      name: 'Rick Sanchez',
+      image: 'rick.png',
+      species: 'Human',
+      type: '',
+      status: 'Alive',
+      gender: 'Male',
+      origin: { name: 'Earth (C-137)', url: '' },
+      location: { name: 'Citadel of Ricks', url: '' },
+      episode: [],
+      url: '',
+      created: '',
+    },
+    {
+      id: 2,
+      name: 'Morty Smith',
+      image: 'morty.png',
+      species: 'Human',
+      type: '',
+      status: 'Alive',
+      gender: 'Male',
+      origin: { name: 'Earth (C-137)', url: '' },
+      location: { name: 'Earth (Replacement Dimension)', url: '' },
+      episode: [],
+      url: '',
+      created: '',
+    },
   ];
 
-  it('renders list of items with names and images', () => {
-    render(<ItemList results={characters} />);
-
+  it('renders all characters passed as props', () => {
+    render(<ItemList results={results} onItemClick={() => {}} />);
     expect(screen.getByText('Rick Sanchez')).toBeInTheDocument();
     expect(screen.getByText('Morty Smith')).toBeInTheDocument();
 
-    const imgs = screen.getAllByRole('img') as HTMLImageElement[];
-    expect(imgs).toHaveLength(1);
-    expect(imgs[0].alt).toBe('Rick Sanchez');
+    const items = screen.getAllByTestId('item');
+    expect(items).toHaveLength(2);
   });
 
-  it('handles empty results array gracefully', () => {
-    render(<ItemList results={[]} />);
-
-    expect(screen.queryByText(/.+/)).not.toBeInTheDocument();
+  it('calls onItemClick with correct ID on click', async () => {
+    const onItemClick = vi.fn();
+    render(<ItemList results={results} onItemClick={onItemClick} />);
+    const rick = screen.getByText('Rick Sanchez');
+    await userEvent.click(rick);
+    expect(onItemClick).toHaveBeenCalledWith(1);
   });
 
-  it('handles undefined results gracefully', () => {
-    render(<ItemList results={undefined as unknown as Character[]} />);
-
-    expect(screen.queryByText(/.+/)).not.toBeInTheDocument();
+  it('renders nothing if results is empty', () => {
+    const { container } = render(
+      <ItemList results={[]} onItemClick={() => {}} />
+    );
+    expect(container.firstChild).toBeNull();
   });
 });

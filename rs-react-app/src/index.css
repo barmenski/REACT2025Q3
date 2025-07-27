@@ -1,4 +1,7 @@
 :root {
+    max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -17,6 +20,10 @@ a {
   font-weight: 500;
   color: #646cff;
   text-decoration: inherit;
+}
+
+li {
+  list-style-type: none;
 }
 
 a:hover {
@@ -67,12 +74,15 @@ button:focus-visible {
 }
 
 .logo {
-  width: 100%;
+  width: 60%;
 }
 
 .item-list {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
   gap: 16px;
   border: 1px dotted black;
   padding: 5px;
@@ -84,10 +94,11 @@ button:focus-visible {
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+  border: 1px solid black;
 }
 
 .item-name {
-  min-width: 10rem;
+  width: 10rem;
   vertical-align: baseline;
 }
 

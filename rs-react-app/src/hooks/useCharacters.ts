@@ -1,4 +1,3 @@
-// hooks/useCharacters.ts
 import { useState, useCallback } from 'react';
 import type { Character } from '../types';
 import useLastQuery from './useLastQuery';
@@ -14,7 +13,6 @@ function useCharacters() {
 
   const [results, setResults] = useState<Character[]>([]);
   const [currentQuery, setCurrentQuery] = useState('');
-  const [, setCurrentPageUrl] = useState('');
   const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
   const [prevPageUrl, setPrevPageUrl] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -40,13 +38,12 @@ function useCharacters() {
       setLoading(true);
       setError(null);
 
-      const url = `${API_BASE_URL}?name=${encodeURIComponent(query)}`;
+      const url = `${API_BASE_URL}?name=${encodeURIComponent(query)}&page=1`;
 
       fetchFromUrl(url)
         .then((data) => {
           setResults(data.results);
           setCurrentQuery(query);
-          setCurrentPageUrl(url);
           setNextPageUrl(data.info.next);
           setPrevPageUrl(data.info.prev);
           setPage(1);
@@ -73,7 +70,6 @@ function useCharacters() {
     fetchFromUrl(url)
       .then((data) => {
         setResults(data.results);
-        setCurrentPageUrl(url);
         setNextPageUrl(data.info.next);
         setPrevPageUrl(data.info.prev);
         setPage(newPage);
