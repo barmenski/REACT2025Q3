@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, MemoryRouter } from 'react-router';
+import { BrowserRouter, Routes, Route } from 'react-router';
 import './index.css';
 import App from './components/App.tsx';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary.tsx';
@@ -12,18 +12,16 @@ createRoot(
 ).render(
   <StrictMode>
     <BrowserRouter>
-      <MemoryRouter>
-        <ErrorBoundary>
-          <Routes>
-            <Route path="/" element={<App />}>
-              <Route index element={null} />
-            </Route>
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/" element={<App />}>
+            <Route index element={null} />
+          </Route>
 
-            <Route path="/about" element={<About />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </ErrorBoundary>
-      </MemoryRouter>
+          <Route path="/about" element={<About />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </ErrorBoundary>
     </BrowserRouter>
   </StrictMode>
 );
