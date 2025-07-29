@@ -40,7 +40,7 @@ export default function ItemDetails() {
   if (!character) return <p>No data</p>;
 
   return (
-    <div className="item-details">
+    <div className="item-details" data-testid="item-details">
       <button
         onClick={closeDetails}
         style={{
