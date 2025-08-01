@@ -91,42 +91,28 @@ const App: React.FC = () => {
         onChange={setCurrentQuery}
       />
 
-      <div
-        className="main-content"
-        style={{ display: 'flex', marginTop: '20px' }}
-      >
+      <div className="main-content">
         {/* Левая часть — список результатов */}
-        <div style={{ flex: 1, paddingRight: '16px' }}>
-          <Loader loading={loading} />
-          {!loading && results.length > 0 && (
-            <>
-              <ItemList results={results} onItemClick={handleItemClick} />
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                hasPrev={!!prevPageUrl}
-                hasNext={!!nextPageUrl}
-                onPrev={handlePrevPage}
-                onNext={handleNextPage}
-              />
-            </>
-          )}
-          {error && <ErrorDescription message={error} />}
-        </div>
 
-        {/* Правая часть — детали, если выбран элемент */}
-        {detailsId && (
-          <div
-            style={{
-              width: '400px',
-              borderLeft: '1px solid #ccc',
-              paddingLeft: '16px',
-              position: 'relative',
-            }}
-          >
-            <ItemDetails />
-          </div>
+        <Loader loading={loading} />
+        {!loading && results.length > 0 && (
+          <>
+            <div className="content">
+              <ItemList results={results} onItemClick={handleItemClick} />
+              {/* Правая часть — детали, если выбран элемент */}
+              {detailsId && <ItemDetails />}
+            </div>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              hasPrev={!!prevPageUrl}
+              hasNext={!!nextPageUrl}
+              onPrev={handlePrevPage}
+              onNext={handleNextPage}
+            />
+          </>
         )}
+        {error && <ErrorDescription message={error} />}
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ export default function SearchInput(props: SearchInputProps) {
   };
 
   return (
-    <div style={{ display: 'flex', gap: '8px' }}>
+    <div className="wrapper-search">
       <input
         type="text"
         value={props.value}

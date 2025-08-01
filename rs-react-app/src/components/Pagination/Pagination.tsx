@@ -16,11 +16,11 @@ export default function Pagination({
   onNext,
 }: Props) {
   return (
-    <div style={{ marginTop: '16px' }}>
+    <div className="wrapper-pagination">
       <button onClick={onPrev} disabled={!hasPrev}>
         ◀ Предыдущая
       </button>
-      <span style={{ margin: '0 12px' }}>
+      <span className="pagination-info">
         Страница {page} из {totalPages}
       </span>
       <button onClick={onNext} disabled={!hasNext}>

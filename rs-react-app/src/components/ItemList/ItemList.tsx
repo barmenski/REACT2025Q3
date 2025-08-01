@@ -9,15 +9,17 @@ type ItemListProps = {
 export default function ItemList({ results, onItemClick }: ItemListProps) {
   if (results.length === 0) return null;
   return (
-    <div className="item-list" data-testid="item-list">
-      {results.map((character) => (
-        <Item
-          key={character.id}
-          name={character.name}
-          image={character.image}
-          onClick={() => onItemClick(character.id)}
-        />
-      ))}
+    <div className="wrapper-item-list">
+      <div className="item-list" data-testid="item-list">
+        {results.map((character) => (
+          <Item
+            key={character.id}
+            name={character.name}
+            image={character.image}
+            onClick={() => onItemClick(character.id)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
