@@ -4,4 +4,5 @@ export type Character = {
   image: string;
   species: string;
   type: string;
+  checked: boolean;
 };
