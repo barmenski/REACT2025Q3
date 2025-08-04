@@ -8,8 +8,7 @@ import ErrorDescription from './ErrorDescription/ErrorDescription';
 import Pagination from './Pagination/Pagination';
 import useCharacters from '../hooks/useCharacters';
 import ItemDetails from './Item/ItemDetails';
-import { useAppDispatch } from '../hooks/reduxHooks';
-import { clearSelection } from '../state/itemsSlice';
+import SelectedPanel from './SelectedPanel/SelectedPanel';
 
 const API_BASE_URL = 'https://rickandmortyapi.com/api/character/';
 
@@ -35,11 +34,6 @@ const App: React.FC = () => {
     hasLastQuery,
   } = useCharacters();
 
-  const dispatch = useAppDispatch();
-
-  const handleClear = () => {
-    dispatch(clearSelection());
-  };
   // Загрузка результатов поиска
   useEffect(() => {
     if (hasLastQuery()) {
@@ -95,7 +89,6 @@ const App: React.FC = () => {
       <div className="main-content">
         {/* Левая часть — список результатов */}
         <Loader loading={loading} />
-        <button onClick={handleClear}>Очистить выбор</button>
         {!loading && results.length > 0 && (
           <>
             <div className="content">
@@ -114,6 +107,7 @@ const App: React.FC = () => {
           </>
         )}
         {error && <ErrorDescription message={error} />}
+        <SelectedPanel />
       </div>
     </div>
   );

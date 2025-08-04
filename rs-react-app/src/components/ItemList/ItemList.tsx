@@ -3,7 +3,6 @@ import type { Character } from '../../types';
 
 type ItemListProps = {
   results: Character[];
-  // onItemClick: (id: number) => void;
 };
 
 export default function ItemList({ results }: ItemListProps) {

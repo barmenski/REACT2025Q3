@@ -3,14 +3,6 @@ import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks';
 import { toggleCharacter } from '../../state/itemsSlice';
 import type { Character } from '../../types';
 
-// type ItemProps = {
-//   name: string;
-//   image: string;
-//   id: number;
-//   checked: boolean;
-//   // onClick?: () => void;
-// };
-
 export default function Item({ item }: { item: Character }) {
   const [searchParams, setSearchParams] = useSearchParams();
 
