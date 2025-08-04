@@ -32,7 +32,7 @@ export default function SelectedPanel() {
 
   return (
     <div className="wrapper-selected-panel">
-      <div>Выбрано: {count}</div>
+      <span className="selected-amount">Checked: {count}</span>
       <div>
         <button onClick={handleClear}>Unselect all</button>
         <button onClick={handleDownload} style={{ marginLeft: 8 }}>

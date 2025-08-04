@@ -228,3 +228,7 @@ html,
   background: #121212;
   color: #eee;
 }
+
+.selected-amount {
+  color: #000;
+}
