@@ -9,6 +9,7 @@ import Pagination from './Pagination/Pagination';
 import useCharacters from '../hooks/useCharacters';
 import ItemDetails from './Item/ItemDetails';
 import SelectedPanel from './SelectedPanel/SelectedPanel';
+import ThemeToggle from './ThemeToggle/ThemeToggle';
 
 const API_BASE_URL = 'https://rickandmortyapi.com/api/character/';
 
@@ -73,6 +74,7 @@ const App: React.FC = () => {
   return (
     <div className="wrapper-main">
       <Header />
+      <ThemeToggle />
       <NavLink
         to="about"
         className={({ isActive }) => (isActive ? 'active' : '')}

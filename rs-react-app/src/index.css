@@ -107,7 +107,7 @@ button:focus-visible {
   padding-right: 16px;
 }
 
-.item-list {
+.light .item-list {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -117,15 +117,39 @@ button:focus-visible {
   border: 1px dotted black;
   padding: 5px;
   margin: 10px;
+
 }
 
-.item {
+.dark .item-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  border: 1px dotted white;
+  padding: 5px;
+  margin: 10px;
+  background-color: #494949;
+}
+
+.light .item {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
   border: 1px solid black;
   cursor: pointer;
+}
+
+.dark .item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  border: 1px solid rgb(255, 255, 255);
+  cursor: pointer;
+  background-color: #2c2c2c;
 }
 
 .item-name {
@@ -191,4 +215,16 @@ button:focus-visible {
   justify-content: space-between;
   border-top: 1px solid #ccc;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+body,
+html,
+.light {
+  background: #ffffff;
+  color: #000;
+}
+
+.dark {
+  background: #121212;
+  color: #eee;
 }
