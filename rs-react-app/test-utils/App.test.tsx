@@ -6,6 +6,7 @@ import { itemsReducer } from '../src/state/itemsSlice';
 import App from '../src/components/App';
 import { vi, describe, it, beforeEach } from 'vitest';
 import { act } from 'react-dom/test-utils';
+import { ThemeProvider } from '../src/context/ThemeContext';
 
 // 🧪 Мокаем useCharacters
 import * as useCharactersModule from '../src/hooks/useCharacters';
@@ -68,9 +69,11 @@ const renderAppWithProviders = (initialRoute = '/?page=1') => {
   return render(
     <Provider store={store}>
       <MemoryRouter initialEntries={[initialRoute]}>
-        <Routes>
-          <Route path="*" element={<App />} />
-        </Routes>
+        <ThemeProvider>
+          <Routes>
+            <Route path="*" element={<App />} />
+          </Routes>
+        </ThemeProvider>
       </MemoryRouter>
     </Provider>
   );
