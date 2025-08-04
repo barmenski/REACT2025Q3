@@ -1,7 +1,24 @@
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import ItemList from '../src/components/ItemList/ItemList';
-import { describe, it, vi } from 'vitest';
+import { describe, it } from 'vitest';
+import { MemoryRouter } from 'react-router';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import { itemsReducer } from '../src/state/itemsSlice'; // путь к твоему слайсу
+
+const renderWithProviders = (ui: React.ReactElement) => {
+  const store = configureStore({
+    reducer: {
+      checkedItems: itemsReducer,
+    },
+  });
+
+  return render(
+    <Provider store={store}>
+      <MemoryRouter>{ui}</MemoryRouter>
+    </Provider>
+  );
+};
 
 describe('<ItemList />', () => {
   const results = [
@@ -18,6 +35,7 @@ describe('<ItemList />', () => {
       episode: [],
       url: '',
       created: '',
+      checked: false,
     },
     {
       id: 2,
@@ -32,30 +50,20 @@ describe('<ItemList />', () => {
       episode: [],
       url: '',
       created: '',
+      checked: false,
     },
   ];
 
   it('renders all characters passed as props', () => {
-    render(<ItemList results={results} onItemClick={() => {}} />);
+    renderWithProviders(<ItemList results={results} />);
     expect(screen.getByText('Rick Sanchez')).toBeInTheDocument();
     expect(screen.getByText('Morty Smith')).toBeInTheDocument();
-
     const items = screen.getAllByTestId('item');
     expect(items).toHaveLength(2);
   });
 
-  it('calls onItemClick with correct ID on click', async () => {
-    const onItemClick = vi.fn();
-    render(<ItemList results={results} onItemClick={onItemClick} />);
-    const rick = screen.getByText('Rick Sanchez');
-    await userEvent.click(rick);
-    expect(onItemClick).toHaveBeenCalledWith(1);
-  });
-
   it('renders nothing if results is empty', () => {
-    const { container } = render(
-      <ItemList results={[]} onItemClick={() => {}} />
-    );
+    const { container } = renderWithProviders(<ItemList results={[]} />);
     expect(container.firstChild).toBeNull();
   });
 });

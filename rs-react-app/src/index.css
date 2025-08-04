@@ -1,5 +1,5 @@
 :root {
-    max-width: 1280px;
+  max-width: 1280px;
   margin: 0 auto;
   text-align: center;
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -42,6 +42,19 @@ button {
   transition: border-color 0.25s;
 }
 
+.button-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #f44336;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+
+}
+
 button:hover {
   border-color: #646cff;
 }
@@ -66,6 +79,11 @@ button:focus-visible {
   }
 }
 
+.wrapper-search {
+  display: flex;
+  gap: 8px;
+}
+
 .wrapper-main {
   display: flex;
   flex-direction: column;
@@ -73,11 +91,23 @@ button:focus-visible {
   align-items: center;
 }
 
+.main-content {
+  display: block;
+  margin-top: 20px;
+}
+
 .logo {
   width: 60%;
 }
 
-.item-list {
+.wrapper-item-list {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 0;
+  padding-right: 16px;
+}
+
+.light .item-list {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -87,14 +117,39 @@ button:focus-visible {
   border: 1px dotted black;
   padding: 5px;
   margin: 10px;
+
 }
 
-.item {
+.dark .item-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  border: 1px dotted white;
+  padding: 5px;
+  margin: 10px;
+  background-color: #494949;
+}
+
+.light .item {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
   border: 1px solid black;
+  cursor: pointer;
+}
+
+.dark .item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  border: 1px solid rgb(255, 255, 255);
+  cursor: pointer;
+  background-color: #2c2c2c;
 }
 
 .item-name {
@@ -128,4 +183,52 @@ button:focus-visible {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.item-details {
+  width: 400px;
+  border-left: 1px solid #ccc;
+  padding-left: 16px;
+  position: relative;
+}
+
+.wrapper-pagination {
+  margin-top: 16px;
+}
+
+.pagination-info {
+  margin: 0 12px;
+}
+
+.content {
+  display: flex;
+}
+
+.wrapper-selected-panel {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #f0f0f0;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #ccc;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+body,
+html,
+.light {
+  background: #ffffff;
+  color: #000;
+}
+
+.dark {
+  background: #121212;
+  color: #eee;
+}
+
+.selected-amount {
+  color: #000;
 }

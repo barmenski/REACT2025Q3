@@ -41,20 +41,7 @@ export default function ItemDetails() {
 
   return (
     <div className="item-details" data-testid="item-details">
-      <button
-        onClick={closeDetails}
-        style={{
-          position: 'absolute',
-          top: 8,
-          right: 8,
-          background: '#f44336',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '4px',
-          padding: '4px 8px',
-          cursor: 'pointer',
-        }}
-      >
+      <button className="button-close" onClick={closeDetails}>
         ✖
       </button>
 

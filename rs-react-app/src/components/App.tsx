@@ -8,6 +8,8 @@ import ErrorDescription from './ErrorDescription/ErrorDescription';
 import Pagination from './Pagination/Pagination';
 import useCharacters from '../hooks/useCharacters';
 import ItemDetails from './Item/ItemDetails';
+import SelectedPanel from './SelectedPanel/SelectedPanel';
+import ThemeToggle from './ThemeToggle/ThemeToggle';
 
 const API_BASE_URL = 'https://rickandmortyapi.com/api/character/';
 
@@ -69,15 +71,10 @@ const App: React.FC = () => {
     }
   };
 
-  // Обработка клика по элементу
-  const handleItemClick = (id: number) => {
-    searchParams.set('details', String(id));
-    setSearchParams(searchParams);
-  };
-
   return (
     <div className="wrapper-main">
       <Header />
+      <ThemeToggle />
       <NavLink
         to="about"
         className={({ isActive }) => (isActive ? 'active' : '')}
@@ -91,42 +88,28 @@ const App: React.FC = () => {
         onChange={setCurrentQuery}
       />
 
-      <div
-        className="main-content"
-        style={{ display: 'flex', marginTop: '20px' }}
-      >
+      <div className="main-content">
         {/* Левая часть — список результатов */}
-        <div style={{ flex: 1, paddingRight: '16px' }}>
-          <Loader loading={loading} />
-          {!loading && results.length > 0 && (
-            <>
-              <ItemList results={results} onItemClick={handleItemClick} />
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                hasPrev={!!prevPageUrl}
-                hasNext={!!nextPageUrl}
-                onPrev={handlePrevPage}
-                onNext={handleNextPage}
-              />
-            </>
-          )}
-          {error && <ErrorDescription message={error} />}
-        </div>
-
-        {/* Правая часть — детали, если выбран элемент */}
-        {detailsId && (
-          <div
-            style={{
-              width: '400px',
-              borderLeft: '1px solid #ccc',
-              paddingLeft: '16px',
-              position: 'relative',
-            }}
-          >
-            <ItemDetails />
-          </div>
+        <Loader loading={loading} />
+        {!loading && results.length > 0 && (
+          <>
+            <div className="content">
+              <ItemList results={results} />
+              {/* Правая часть — детали, если выбран элемент */}
+              {detailsId && <ItemDetails />}
+            </div>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              hasPrev={!!prevPageUrl}
+              hasNext={!!nextPageUrl}
+              onPrev={handlePrevPage}
+              onNext={handleNextPage}
+            />
+          </>
         )}
+        {error && <ErrorDescription message={error} />}
+        <SelectedPanel />
       </div>
     </div>
   );
