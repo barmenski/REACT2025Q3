@@ -36,25 +36,12 @@ export default function ItemDetails() {
   };
 
   if (!detailsId) return null;
-  if (loading) return <p>Loading details...</p>;
+  if (loading) return <p>⏳ Загрузка...</p>;
   if (!character) return <p>No data</p>;
 
   return (
     <div className="item-details" data-testid="item-details">
-      <button
-        onClick={closeDetails}
-        style={{
-          position: 'absolute',
-          top: 8,
-          right: 8,
-          background: '#f44336',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '4px',
-          padding: '4px 8px',
-          cursor: 'pointer',
-        }}
-      >
+      <button className="button-close" onClick={closeDetails}>
         ✖
       </button>
 

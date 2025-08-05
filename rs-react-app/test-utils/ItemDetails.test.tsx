@@ -57,7 +57,7 @@ describe('ItemDetails', () => {
     );
 
     // Проверяем состояние загрузки
-    expect(screen.getByText(/Loading details/)).toBeInTheDocument();
+    expect(screen.getByText(/Загрузка/)).toBeInTheDocument();
 
     // Ждем появления данных персонажа
     await waitFor(() => {
@@ -80,7 +80,7 @@ describe('ItemDetails', () => {
     );
 
     // Проверяем состояние загрузки
-    expect(screen.getByText(/Loading details/)).toBeInTheDocument();
+    expect(screen.getByText(/Загрузка/)).toBeInTheDocument();
 
     // Ждем появления сообщения "No data"
     await waitFor(() => {
