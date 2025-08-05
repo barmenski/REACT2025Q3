@@ -6,6 +6,7 @@ import App from './components/App.tsx';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary.tsx';
 import About from './components/About/About.tsx';
 import NotFound from './components/NotFound/NotFound.tsx';
+import Layout from './components/Layout/Layout.tsx';
 
 createRoot(
   document.querySelector('#root') || document.createElement('div')
@@ -14,12 +15,11 @@ createRoot(
     <BrowserRouter>
       <ErrorBoundary>
         <Routes>
-          <Route path="/" element={<App />}>
-            <Route index element={null} />
+          <Route path="/" element={<Layout />}>
+            <Route index element={<App />} />
+            <Route path="about" element={<About />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
-
-          <Route path="/about" element={<About />} />
-          <Route path="*" element={<NotFound />} />
         </Routes>
       </ErrorBoundary>
     </BrowserRouter>

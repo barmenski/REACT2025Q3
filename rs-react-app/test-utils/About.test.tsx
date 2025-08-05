@@ -37,28 +37,4 @@ describe('About component', () => {
     expect(rsLink).toHaveAttribute('target', '_blank');
     expect(rsLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
-
-  it('renders NavLink "Home" with active class when path is "/"', () => {
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <About />
-      </MemoryRouter>
-    );
-
-    const homeLink = screen.getByText('Home');
-    expect(homeLink).toBeInTheDocument();
-    expect(homeLink).toHaveClass('active');
-  });
-
-  it('renders NavLink "Home" without active class when path is not "/"', () => {
-    render(
-      <MemoryRouter initialEntries={['/about']}>
-        <About />
-      </MemoryRouter>
-    );
-
-    const homeLink = screen.getByText('Home');
-    expect(homeLink).toBeInTheDocument();
-    expect(homeLink).not.toHaveClass('active');
-  });
 });

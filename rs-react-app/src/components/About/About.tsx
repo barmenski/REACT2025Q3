@@ -1,5 +1,3 @@
-import { NavLink } from 'react-router';
-
 export default function About() {
   return (
     <>
@@ -23,9 +21,6 @@ export default function About() {
           </a>
         </li>
       </ul>
-      <NavLink to="/" className={({ isActive }) => (isActive ? 'active' : '')}>
-        Home
-      </NavLink>
     </>
   );
 }

@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
-import { NavLink, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
 import SearchInput from './SearchInput/SearchInput';
 import ItemList from './ItemList/ItemList';
-import Header from './Header/Header';
 import Loader from './Loader/Loader';
 import ErrorDescription from './ErrorDescription/ErrorDescription';
 import Pagination from './Pagination/Pagination';
@@ -77,14 +76,6 @@ const App: React.FC = () => {
 
   return (
     <div className="wrapper-main">
-      <Header />
-      <NavLink
-        to="about"
-        className={({ isActive }) => (isActive ? 'active' : '')}
-      >
-        About
-      </NavLink>
-
       <SearchInput
         onSearch={search}
         value={currentQuery}

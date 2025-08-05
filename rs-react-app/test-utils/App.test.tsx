@@ -114,6 +114,142 @@ describe('App component', () => {
     expect(screen.getByText('◀ Предыдущая')).toBeDisabled();
   });
 
+  it('calls search("") if no last query is saved', () => {
+    const searchMock = vi.fn();
+
+    mockedUseCharacters.mockReturnValue({
+      results: [],
+      currentQuery: '',
+      setCurrentQuery: vi.fn(),
+      nextPageUrl: null,
+      prevPageUrl: null,
+      page: 1,
+      totalPages: 1,
+      loading: false,
+      error: '',
+      search: searchMock,
+      loadPage: vi.fn(),
+      loadLastQuery: () => '',
+      hasLastQuery: () => false,
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(searchMock).toHaveBeenCalledWith('');
+  });
+
+  it('shows loader when loading is true', () => {
+    mockedUseCharacters.mockReturnValue({
+      results: [],
+      currentQuery: '',
+      setCurrentQuery: vi.fn(),
+      nextPageUrl: null,
+      prevPageUrl: null,
+      page: 1,
+      totalPages: 1,
+      loading: true,
+      error: '',
+      search: vi.fn(),
+      loadPage: vi.fn(),
+      loadLastQuery: () => '',
+      hasLastQuery: () => false,
+    });
+
+    render(
+      <MemoryRouter>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('⏳ Загрузка...')).toBeInTheDocument();
+  });
+
+  it('handles next page click', () => {
+    const loadPageMock = vi.fn();
+
+    mockedUseCharacters.mockReturnValue({
+      results: [
+        {
+          id: 1,
+          name: 'Rick Sanchez',
+          image: 'some.png',
+          species: 'rick',
+          type: 'rick',
+        },
+      ],
+      currentQuery: '',
+      setCurrentQuery: vi.fn(),
+      nextPageUrl: 'next-url',
+      prevPageUrl: 'prev-url',
+      page: 1,
+      totalPages: 3,
+      loading: false,
+      error: '',
+      search: vi.fn(),
+      loadPage: loadPageMock,
+      loadLastQuery: () => 'Rick',
+      hasLastQuery: () => true,
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/?page=1']}>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByText('Следующая ▶'));
+    expect(loadPageMock).toHaveBeenCalledWith('next-url', 2);
+  });
+
+  it('handles previous page click', () => {
+    const loadPageMock = vi.fn();
+
+    mockedUseCharacters.mockReturnValue({
+      results: [
+        {
+          id: 1,
+          name: 'Rick Sanchez',
+          image: 'some.png',
+          species: 'rick',
+          type: 'rick',
+        },
+      ],
+      currentQuery: '',
+      setCurrentQuery: vi.fn(),
+      nextPageUrl: 'next-url',
+      prevPageUrl: 'prev-url',
+      page: 2,
+      totalPages: 3,
+      loading: false,
+      error: '',
+      search: vi.fn(),
+      loadPage: loadPageMock,
+      loadLastQuery: () => 'Rick',
+      hasLastQuery: () => true,
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/?page=2']}>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByText('◀ Предыдущая'));
+    expect(loadPageMock).toHaveBeenCalledWith('prev-url', 1);
+  });
+
   it('displays details panel when "details" param exists', async () => {
     mockedUseCharacters.mockReturnValue({
       results: [
