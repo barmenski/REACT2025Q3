@@ -1,20 +1,19 @@
-import React from 'react';
-
 type ItemProps = {
   name: string;
   image: string;
+  onClick?: () => void;
 };
 
-class Item extends React.Component<ItemProps> {
-  render() {
-    const { name, image } = this.props;
-    return (
-      <div className="item">
-        <p className="item-name">{this.props.name}</p>
-        {image && <img className="item-img" src={image} alt={name} />}
-      </div>
-    );
-  }
+export default function Item({ name, image, onClick }: ItemProps) {
+  return (
+    <div
+      className="item"
+      onClick={onClick}
+      style={{ cursor: 'pointer' }}
+      data-testid="item"
+    >
+      <p className="item-name">{name}</p>
+      {image && <img className="item-img" src={image} alt={name} />}
+    </div>
+  );
 }
-
-export default Item;

@@ -1,48 +1,36 @@
 import React from 'react';
 
-interface SearchInputProps {
+type SearchInputProps = {
   onSearch: (query: string) => void;
   value: string;
   onChange: (value: string) => void;
-}
+};
 
-class SearchInput extends React.Component<SearchInputProps> {
-  constructor(props: SearchInputProps) {
-    super(props);
+export default function SearchInput(props: SearchInputProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    props.onChange(e.target.value);
+  };
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSearch = this.handleSearch.bind(this);
-    this.handleKeyDown = this.handleKeyDown.bind(this);
-  }
+  const handleSearch = () => {
+    props.onSearch(props.value);
+  };
 
-  handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    this.props.onChange(e.target.value);
-  }
-
-  handleSearch() {
-    this.props.onSearch(this.props.value);
-  }
-
-  handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      this.props.onSearch(this.props.value);
+      props.onSearch(props.value);
     }
-  }
+  };
 
-  render() {
-    return (
-      <div style={{ display: 'flex', gap: '8px' }}>
-        <input
-          type="text"
-          value={this.props.value}
-          onChange={this.handleChange}
-          onKeyDown={this.handleKeyDown}
-          placeholder="Введите запрос..."
-        />
-        <button onClick={this.handleSearch}>🔍 Поиск</button>
-      </div>
-    );
-  }
+  return (
+    <div className="wrapper-search">
+      <input
+        type="text"
+        value={props.value}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        placeholder="Введите запрос..."
+      />
+      <button onClick={handleSearch}>🔍 Поиск</button>
+    </div>
+  );
 }
-
-export default SearchInput;

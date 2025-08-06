@@ -1,119 +1,355 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router';
 import App from '../src/components/App';
-import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
-// mock API response
-const mockApiResponse = {
-  info: { count: 1, pages: 1, next: null, prev: null },
-  results: [{ id: 1, name: 'Rick Sanchez', image: 'rick.png' }],
-};
+// импортируем модуль, а не функцию
+import * as useCharactersModule from '../src/hooks/useCharacters';
 
-beforeEach(() => {
-  vi.resetAllMocks();
-  localStorage.clear();
+vi.mock('../src/hooks/useCharacters');
 
-  global.fetch = vi.fn(() =>
-    Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve(mockApiResponse),
-    })
-  ) as unknown as typeof fetch;
+const mockedUseCharacters = useCharactersModule.default as jest.Mock;
+
+mockedUseCharacters.mockReturnValueOnce({
+  results: [
+    {
+      id: 1,
+      name: 'Rick Sanchez',
+      image: 'some.png',
+      species: 'rick',
+      type: 'rick',
+    },
+  ],
+  currentQuery: '',
+  setCurrentQuery: vi.fn(),
+  nextPageUrl: 'next-url',
+  prevPageUrl: null,
+  page: 1,
+  totalPages: 2,
+  loading: false,
+  error: '',
+  search: vi.fn(),
+  loadPage: vi.fn(),
+  loadLastQuery: () => 'Rick',
+  hasLastQuery: () => true,
 });
 
-describe('App', () => {
-  it('renders without crashing', async () => {
-    render(<App />);
-    await waitFor(() => {
-      expect(screen.getByText(/Поиск/i)).toBeInTheDocument();
-    });
+vi.mock('../../components/Item/ItemDetails', () => ({
+  __esModule: true,
+  default: () => <div data-testid="item-details">Details shown</div>,
+}));
+
+vi.mock('../../components/ItemList/ItemList', () => ({
+  __esModule: true,
+  default: ({ onItemClick }: { onItemClick: (id: number) => void }) => (
+    <div data-testid="item-list">
+      <button onClick={() => onItemClick(1)}>Rick Sanchez</button>
+    </div>
+  ),
+}));
+
+vi.mock('../../components/Loader/Loader', () => ({
+  __esModule: true,
+  default: ({ loading }: { loading: boolean }) =>
+    loading ? <div>Loading...</div> : null,
+}));
+
+vi.mock('../../components/ErrorDescription/ErrorDescription', () => ({
+  __esModule: true,
+  default: ({ message }: { message: string }) => <div>{message}</div>,
+}));
+
+vi.mock('../../components/SearchInput/SearchInput', () => ({
+  __esModule: true,
+  default: ({ onSearch }: { onSearch: (query: string) => void }) => (
+    <input
+      data-testid="search-input"
+      onChange={(e) => onSearch(e.target.value)}
+    />
+  ),
+}));
+
+describe('App component', () => {
+  beforeEach(() => {
+    // Сбрасываем мок перед каждым тестом
+    mockedUseCharacters.mockReset();
   });
 
-  it('Retrieves saved search term on component mount', async () => {
-    localStorage.setItem('lastQuery', 'Rick');
-
-    render(<App />);
-
-    // wait, fetch contain query=Rick
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('name=Rick')
-      );
-      expect(screen.getByRole('textbox')).toHaveValue('Rick');
+  it('renders item list and pagination', async () => {
+    mockedUseCharacters.mockReturnValue({
+      results: [
+        {
+          id: 1,
+          name: 'Rick Sanchez',
+          image: 'some.png',
+          species: 'rick',
+          type: 'rick',
+        },
+      ],
+      currentQuery: '',
+      setCurrentQuery: vi.fn(),
+      nextPageUrl: 'next-url',
+      prevPageUrl: null,
+      page: 1,
+      totalPages: 2,
+      loading: false,
+      error: '',
+      search: vi.fn(),
+      loadPage: vi.fn(),
+      loadLastQuery: () => 'Rick',
+      hasLastQuery: () => true,
     });
-  });
 
-  it('Overwrites existing localStorage value when new search is performed', async () => {
-    render(<App />);
-
-    const input = screen.getByRole('textbox');
-    const user = userEvent.setup();
-
-    await user.clear(input);
-    await user.type(input, 'Morty');
-    await user.keyboard('{Enter}');
-
-    // дождись рендера новых данных
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('name=Morty')
-      );
-      expect(screen.getByRole('textbox')).toHaveValue('Morty');
-    });
-  });
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
-
-describe('App display error', () => {
-  it('displays error message when API call fails with 404', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: false,
-        status: 404,
-        json: async () => ({}),
-      })
+    render(
+      <MemoryRouter initialEntries={['/?page=1']}>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
     );
 
-    render(<App />);
+    expect(await screen.findByTestId('item-list')).toBeInTheDocument();
+    expect(screen.getByText('Страница 1 из 2')).toBeInTheDocument();
+    expect(screen.getByText('Следующая ▶')).toBeEnabled();
+    expect(screen.getByText('◀ Предыдущая')).toBeDisabled();
+  });
 
+  it('calls search("") if no last query is saved', () => {
+    const searchMock = vi.fn();
+
+    mockedUseCharacters.mockReturnValue({
+      results: [],
+      currentQuery: '',
+      setCurrentQuery: vi.fn(),
+      nextPageUrl: null,
+      prevPageUrl: null,
+      page: 1,
+      totalPages: 1,
+      loading: false,
+      error: '',
+      search: searchMock,
+      loadPage: vi.fn(),
+      loadLastQuery: () => '',
+      hasLastQuery: () => false,
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(searchMock).toHaveBeenCalledWith('');
+  });
+
+  it('shows loader when loading is true', () => {
+    mockedUseCharacters.mockReturnValue({
+      results: [],
+      currentQuery: '',
+      setCurrentQuery: vi.fn(),
+      nextPageUrl: null,
+      prevPageUrl: null,
+      page: 1,
+      totalPages: 1,
+      loading: true,
+      error: '',
+      search: vi.fn(),
+      loadPage: vi.fn(),
+      loadLastQuery: () => '',
+      hasLastQuery: () => false,
+    });
+
+    render(
+      <MemoryRouter>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('⏳ Загрузка...')).toBeInTheDocument();
+  });
+
+  it('handles next page click', () => {
+    const loadPageMock = vi.fn();
+
+    mockedUseCharacters.mockReturnValue({
+      results: [
+        {
+          id: 1,
+          name: 'Rick Sanchez',
+          image: 'some.png',
+          species: 'rick',
+          type: 'rick',
+        },
+      ],
+      currentQuery: '',
+      setCurrentQuery: vi.fn(),
+      nextPageUrl: 'next-url',
+      prevPageUrl: 'prev-url',
+      page: 1,
+      totalPages: 3,
+      loading: false,
+      error: '',
+      search: vi.fn(),
+      loadPage: loadPageMock,
+      loadLastQuery: () => 'Rick',
+      hasLastQuery: () => true,
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/?page=1']}>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByText('Следующая ▶'));
+    expect(loadPageMock).toHaveBeenCalledWith('next-url', 2);
+  });
+
+  it('handles previous page click', () => {
+    const loadPageMock = vi.fn();
+
+    mockedUseCharacters.mockReturnValue({
+      results: [
+        {
+          id: 1,
+          name: 'Rick Sanchez',
+          image: 'some.png',
+          species: 'rick',
+          type: 'rick',
+        },
+      ],
+      currentQuery: '',
+      setCurrentQuery: vi.fn(),
+      nextPageUrl: 'next-url',
+      prevPageUrl: 'prev-url',
+      page: 2,
+      totalPages: 3,
+      loading: false,
+      error: '',
+      search: vi.fn(),
+      loadPage: loadPageMock,
+      loadLastQuery: () => 'Rick',
+      hasLastQuery: () => true,
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/?page=2']}>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByText('◀ Предыдущая'));
+    expect(loadPageMock).toHaveBeenCalledWith('prev-url', 1);
+  });
+
+  it('displays details panel when "details" param exists', async () => {
+    mockedUseCharacters.mockReturnValue({
+      results: [
+        {
+          id: 1,
+          name: 'Rick Sanchez',
+          image: 'some.png',
+          species: 'rick',
+          type: 'rick',
+        },
+      ],
+      currentQuery: '',
+      setCurrentQuery: vi.fn(),
+      nextPageUrl: 'next-url',
+      prevPageUrl: null,
+      page: 1,
+      totalPages: 2,
+      loading: false,
+      error: '',
+      search: vi.fn(),
+      loadPage: vi.fn(),
+      loadLastQuery: () => 'Rick',
+      hasLastQuery: () => true,
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/?page=1&details=1']}>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByTestId('item-details')).toBeInTheDocument();
+  });
+
+  it('handles item click and sets details param', async () => {
+    mockedUseCharacters.mockReturnValue({
+      results: [
+        {
+          id: 1,
+          name: 'Rick Sanchez',
+          image: 'some.png',
+          species: 'rick',
+          type: 'rick',
+        },
+      ],
+      currentQuery: '',
+      setCurrentQuery: vi.fn(),
+      nextPageUrl: 'next-url',
+      prevPageUrl: null,
+      page: 1,
+      totalPages: 2,
+      loading: false,
+      error: '',
+      search: vi.fn(),
+      loadPage: vi.fn(),
+      loadLastQuery: () => 'Rick',
+      hasLastQuery: () => true,
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/?page=1']}>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    fireEvent.click(await screen.findByText('Rick Sanchez'));
     await waitFor(() => {
-      expect(screen.getByText(/персонажи не найдены/i)).toBeInTheDocument();
+      expect(screen.getByTestId('item-details')).toBeInTheDocument();
     });
   });
 
-  it('displays error message when API is unavailable (503)', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: false,
-        status: 503,
-        json: async () => ({}),
-      })
+  it('shows error message when error occurs', () => {
+    mockedUseCharacters.mockReturnValue({
+      results: [],
+      currentQuery: '',
+      setCurrentQuery: vi.fn(),
+      nextPageUrl: null,
+      prevPageUrl: null,
+      page: 1,
+      totalPages: 1,
+      loading: false,
+      error: 'Something went wrong',
+      search: vi.fn(),
+      loadPage: vi.fn(),
+      loadLastQuery: () => '',
+      hasLastQuery: () => false,
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="*" element={<App />} />
+        </Routes>
+      </MemoryRouter>
     );
 
-    render(<App />);
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(/сервис временно недоступен/i)
-      ).toBeInTheDocument();
-    });
-  });
-
-  it('displays generic error message on unexpected error', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockRejectedValue(new Error('Network error'))
-    );
-
-    render(<App />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/network error/i)).toBeInTheDocument();
-    });
+    expect(screen.getByText(/Something went wrong/)).toBeInTheDocument();
   });
 });

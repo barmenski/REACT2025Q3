@@ -1,30 +1,15 @@
-import React from 'react';
+import { useState } from 'react';
 
-interface ErrorButtonState {
-  shouldThrowError: boolean;
+export default function ErrorButton() {
+  const [shouldThrow, setShouldThrow] = useState(false);
+
+  if (shouldThrow) {
+    throw new Error('Test error from button');
+  }
+
+  return (
+    <button className="error-button" onClick={() => setShouldThrow(true)}>
+      Error button
+    </button>
+  );
 }
-
-class ErrorButton extends React.Component<object, ErrorButtonState> {
-  constructor(props: object) {
-    super(props);
-    this.state = { shouldThrowError: false };
-    this.triggerError = this.triggerError.bind(this);
-  }
-
-  triggerError() {
-    this.setState({ shouldThrowError: true });
-  }
-
-  render() {
-    if (this.state.shouldThrowError) {
-      throw new Error('Test Error from Button');
-    }
-    return (
-      <button className="error-button" onClick={this.triggerError}>
-        Error Button
-      </button>
-    );
-  }
-}
-
-export default ErrorButton;

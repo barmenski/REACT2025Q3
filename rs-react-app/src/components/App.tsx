@@ -1,202 +1,111 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useSearchParams } from 'react-router';
 import SearchInput from './SearchInput/SearchInput';
 import ItemList from './ItemList/ItemList';
-import Header from './Header/Header';
 import Loader from './Loader/Loader';
 import ErrorDescription from './ErrorDescription/ErrorDescription';
-import ErrorButton from './ErrorButton/ErrorButton';
-import './App.css';
+import Pagination from './Pagination/Pagination';
+import useCharacters from '../hooks/useCharacters';
+import ItemDetails from './Item/ItemDetails';
 
-export type Character = {
-  id: number;
-  name: string;
-  image: string;
-};
+const API_BASE_URL = 'https://rickandmortyapi.com/api/character/';
 
-type ApiResponse = {
-  info: {
-    count: number;
-    pages: number;
-    next: string | null;
-    prev: string | null;
-  };
-  results: Character[];
-};
+const App: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
 
-type AppState = {
-  results: Character[];
-  currentQuery: string;
-  currentPageUrl: string;
-  nextPageUrl: string | null;
-  prevPageUrl: string | null;
-  page: number;
-  totalPages: number;
-  loading: boolean;
-  error: string | null;
-  forceRenderError: boolean;
-};
+  const pageFromUrl = Number(searchParams.get('page')) || 1;
+  const detailsId = searchParams.get('details');
 
-class App extends React.Component<object, AppState> {
-  constructor(props: object) {
-    super(props);
+  const {
+    results,
+    currentQuery,
+    setCurrentQuery,
+    nextPageUrl,
+    prevPageUrl,
+    page,
+    totalPages,
+    loading,
+    error,
+    search,
+    loadPage,
+    loadLastQuery,
+    hasLastQuery,
+  } = useCharacters();
 
-    this.state = {
-      results: [],
-      currentQuery: '',
-      currentPageUrl: '',
-      nextPageUrl: null,
-      prevPageUrl: null,
-      page: 1,
-      totalPages: 1,
-      loading: false,
-      error: null,
-      forceRenderError: false,
-    };
-
-    this.handleSearch = this.handleSearch.bind(this);
-    this.handleQueryChange = this.handleQueryChange.bind(this);
-    this.loadPage = this.loadPage.bind(this);
-    this.handleNextPage = this.handleNextPage.bind(this);
-    this.handlePrevPage = this.handlePrevPage.bind(this);
-    this.triggerTestError = this.triggerTestError.bind(this);
-  }
-
-  componentDidMount() {
-    const savedQuery = localStorage.getItem('lastQuery');
-    if (savedQuery) {
-      this.setState({ currentQuery: savedQuery });
-      this.handleSearch(savedQuery);
+  // Загрузка результатов поиска
+  useEffect(() => {
+    if (hasLastQuery()) {
+      const last = loadLastQuery();
+      setCurrentQuery(last);
+      const url = `${API_BASE_URL}?name=${encodeURIComponent(last)}&page=${pageFromUrl}`;
+      loadPage(url, pageFromUrl);
     } else {
-      this.setState({ currentQuery: '' });
-      this.handleSearch('');
+      search('');
     }
-  }
+  }, [
+    hasLastQuery,
+    loadLastQuery,
+    search,
+    setCurrentQuery,
+    loadPage,
+    pageFromUrl,
+  ]);
 
-  handleQueryChange(newQuery: string) {
-    this.setState({ currentQuery: newQuery });
-  }
-
-  handleSearch(queryRaw: string) {
-    const query = queryRaw.trim();
-
-    localStorage.setItem('lastQuery', query);
-
-    const url = `https://rickandmortyapi.com/api/character/?name=${encodeURIComponent(query)}`;
-    this.loadPage(url, 1);
-  }
-
-  triggerTestError() {
-    this.setState({ forceRenderError: true });
-  }
-
-  loadPage(url: string, page: number) {
-    this.setState({ loading: true, error: null });
-    fetch(url)
-      .then((response) => {
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('404: Персонажи не найдены');
-          }
-          if (response.status === 503) {
-            throw new Error('503: Сервис временно недоступен');
-          }
-          throw new Error(`${response.status}: Ошибка сервера`);
-        }
-        return response.json();
-      })
-      .then((data: ApiResponse) => {
-        if (data.results && data.results.length > 0) {
-          this.setState({
-            results: data.results,
-            currentPageUrl: url,
-            nextPageUrl: data.info.next,
-            prevPageUrl: data.info.prev,
-            page,
-            totalPages: data.info.pages,
-            loading: false,
-            error: null,
-          });
-        } else {
-          this.setState({
-            results: [],
-            nextPageUrl: null,
-            prevPageUrl: null,
-            page: 1,
-            totalPages: 1,
-            loading: false,
-            error: 'Персонажи не найдены',
-          });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        this.setState({
-          results: [],
-          nextPageUrl: null,
-          prevPageUrl: null,
-          page: 1,
-          totalPages: 1,
-          loading: false,
-          error: err.message || 'Ошибка загрузки',
-        });
-      });
-  }
-
-  handleNextPage() {
-    if (this.state.nextPageUrl) {
-      this.loadPage(this.state.nextPageUrl, this.state.page + 1);
+  // Обработка пагинации
+  const handleNextPage = () => {
+    if (nextPageUrl) {
+      loadPage(nextPageUrl, page + 1);
+      searchParams.set('page', String(page + 1));
+      setSearchParams(searchParams);
     }
-  }
+  };
 
-  handlePrevPage() {
-    if (this.state.prevPageUrl) {
-      this.loadPage(this.state.prevPageUrl, this.state.page - 1);
+  const handlePrevPage = () => {
+    if (prevPageUrl) {
+      loadPage(prevPageUrl, page - 1);
+      searchParams.set('page', String(page - 1));
+      setSearchParams(searchParams);
     }
-  }
+  };
 
-  render() {
-    return (
-      <div className="wrapper-main">
-        <Header />
-        <SearchInput
-          onSearch={this.handleSearch}
-          value={this.state.currentQuery}
-          onChange={this.handleQueryChange}
-        />
-        <div className="result">
-          {this.state.forceRenderError &&
-            (() => {
-              throw new Error('Тестовая ошибка рендера');
-            })()}
-          <Loader loading={this.state.loading} />
-          {!this.state.loading && this.state.results.length > 0 ? (
-            <>
-              <ItemList results={this.state.results} />
-              <div style={{ marginTop: '16px' }}>
-                <button
-                  onClick={this.handlePrevPage}
-                  disabled={!this.state.prevPageUrl}
-                >
-                  ◀ Предыдущая
-                </button>
-                <span style={{ margin: '0 12px' }}>
-                  Страница {this.state.page} из {this.state.totalPages}
-                </span>
-                <button
-                  onClick={this.handleNextPage}
-                  disabled={!this.state.nextPageUrl}
-                >
-                  Следующая ▶
-                </button>
-              </div>
-            </>
-          ) : null}
-        </div>
-        {this.state.error && <ErrorDescription message={this.state.error} />}
-        <ErrorButton />
+  // Обработка клика по элементу
+  const handleItemClick = (id: number) => {
+    searchParams.set('details', String(id));
+    setSearchParams(searchParams);
+  };
+
+  return (
+    <div className="wrapper-main">
+      <SearchInput
+        onSearch={search}
+        value={currentQuery}
+        onChange={setCurrentQuery}
+      />
+
+      <div className="main-content">
+        {/* Левая часть — список результатов */}
+        <Loader loading={loading} />
+        {!loading && results.length > 0 && (
+          <>
+            <div className="content">
+              <ItemList results={results} onItemClick={handleItemClick} />
+              {/* Правая часть — детали, если выбран элемент */}
+              {detailsId && <ItemDetails />}
+            </div>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              hasPrev={!!prevPageUrl}
+              hasNext={!!nextPageUrl}
+              onPrev={handlePrevPage}
+              onNext={handleNextPage}
+            />
+          </>
+        )}
+        {error && <ErrorDescription message={error} />}
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 export default App;

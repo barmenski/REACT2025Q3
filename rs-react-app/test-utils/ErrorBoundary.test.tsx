@@ -3,6 +3,15 @@ import { describe, it, vi, expect } from 'vitest';
 import ErrorBoundary from '../src/components/ErrorBoundary/ErrorBoundary';
 
 describe('ErrorBoundary', () => {
+  const originalError = console.error;
+
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    console.error = originalError;
+  });
   it('displays fallback UI when error occurs', () => {
     const ProblemChild = () => {
       throw new Error('Test error');

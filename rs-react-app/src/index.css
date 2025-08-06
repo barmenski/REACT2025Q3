@@ -1,4 +1,7 @@
 :root {
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -19,6 +22,10 @@ a {
   text-decoration: inherit;
 }
 
+li {
+  list-style-type: none;
+}
+
 a:hover {
   color: #535bf2;
 }
@@ -33,6 +40,19 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+}
+
+.button-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #f44336;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+
 }
 
 button:hover {
@@ -51,12 +71,17 @@ button:focus-visible {
   }
 
   a:hover {
-    color: #747bff;
+    color: #3d5830;
   }
 
   button {
     background-color: #f9f9f9;
   }
+}
+
+.wrapper-search {
+  display: flex;
+  gap: 8px;
 }
 
 .wrapper-main {
@@ -66,17 +91,33 @@ button:focus-visible {
   align-items: center;
 }
 
+.main-content {
+  display: block;
+  margin-top: 20px;
+}
+
 .logo {
-  width: 100%;
+  width: 60%;
+}
+
+.wrapper-item-list {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 0;
+  padding-right: 16px;
 }
 
 .item-list {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
   gap: 16px;
   border: 1px dotted black;
   padding: 5px;
   margin: 10px;
+
 }
 
 .item {
@@ -84,10 +125,12 @@ button:focus-visible {
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+  border: 1px solid black;
+  cursor: pointer;
 }
 
 .item-name {
-  min-width: 10rem;
+  width: 10rem;
   vertical-align: baseline;
 }
 
@@ -117,4 +160,70 @@ button:focus-visible {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.item-details {
+  width: 400px;
+  border-left: 1px solid #ccc;
+  padding-left: 16px;
+  position: relative;
+}
+
+.wrapper-pagination {
+  margin-top: 16px;
+}
+
+.pagination-info {
+  margin: 0 12px;
+}
+
+.content {
+  display: flex;
+}
+
+.selected-amount {
+  color: #000;
+}
+
+.wrapper-nav-link {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.nav-link {
+  border-radius: 8px;
+  border: 1px solid black;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #f9f9f9;
+  color: black;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  margin: 1rem;
+}
+
+.nav-link.active {
+  background-color: #00AFC7;
+}
+
+.not-found {
+  text-align: center;
+  margin-top: 100px;
+  color: #00AFC7;
+  -webkit-text-stroke: 1.5px black;
+  text-shadow:
+    0 0 2px #196254,
+    0 0 20px #8ECC72
+}
+
+.not-found h1 {
+  font-size: 10rem;
+  margin: 0;
+}
+
+.not-found p {
+  font-size: 3rem;
 }
