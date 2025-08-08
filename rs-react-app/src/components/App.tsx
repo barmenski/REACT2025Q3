@@ -1,15 +1,13 @@
 import React, { useEffect } from 'react';
-import { NavLink, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
 import SearchInput from './SearchInput/SearchInput';
 import ItemList from './ItemList/ItemList';
-import Header from './Header/Header';
 import Loader from './Loader/Loader';
 import ErrorDescription from './ErrorDescription/ErrorDescription';
 import Pagination from './Pagination/Pagination';
 import useCharacters from '../hooks/useCharacters';
 import ItemDetails from './Item/ItemDetails';
 import SelectedPanel from './SelectedPanel/SelectedPanel';
-import ThemeToggle from './ThemeToggle/ThemeToggle';
 
 const API_BASE_URL = 'https://rickandmortyapi.com/api/character/';
 
@@ -73,15 +71,6 @@ const App: React.FC = () => {
 
   return (
     <div className="wrapper-main">
-      <Header />
-      <ThemeToggle />
-      <NavLink
-        to="about"
-        className={({ isActive }) => (isActive ? 'active' : '')}
-      >
-        About
-      </NavLink>
-
       <SearchInput
         onSearch={search}
         value={currentQuery}

@@ -9,6 +9,7 @@ import NotFound from './components/NotFound/NotFound.tsx';
 import { store } from './state/store.ts';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from './context/ThemeContext.tsx';
+import Layout from './components/Layout/Layout.tsx';
 
 createRoot(
   document.querySelector('#root') || document.createElement('div')
@@ -19,12 +20,11 @@ createRoot(
         <BrowserRouter>
           <ErrorBoundary>
             <Routes>
-              <Route path="/" element={<App />}>
-                <Route index element={null} />
+              <Route path="/" element={<Layout />}>
+                <Route index element={<App />} />
+                <Route path="about" element={<About />} />
+                <Route path="*" element={<NotFound />} />
               </Route>
-
-              <Route path="/about" element={<About />} />
-              <Route path="*" element={<NotFound />} />
             </Routes>
           </ErrorBoundary>
         </BrowserRouter>
