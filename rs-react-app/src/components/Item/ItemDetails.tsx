@@ -1,34 +1,17 @@
 import { useSearchParams } from 'react-router';
-import { useEffect, useState } from 'react';
-import type { Character } from '../../types';
+import { useGetCharacterByIdQuery } from '../../state/charactersApi';
 
 export default function ItemDetails() {
   const [searchParams, setSearchParams] = useSearchParams();
   const detailsId = searchParams.get('details');
+  const idNum = detailsId ? parseInt(detailsId, 10) : undefined;
 
-  const [character, setCharacter] = useState<Character | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!detailsId) return;
-
-    const fetchCharacter = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `https://rickandmortyapi.com/api/character/${detailsId}`
-        );
-        const data = await res.json();
-        setCharacter(data);
-      } catch {
-        setCharacter(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCharacter();
-  }, [detailsId]);
+  const { data, isLoading, isError } = useGetCharacterByIdQuery(
+    idNum ?? (Symbol() as unknown as number),
+    {
+      skip: idNum === undefined,
+    }
+  );
 
   const closeDetails = () => {
     searchParams.delete('details');
@@ -36,22 +19,21 @@ export default function ItemDetails() {
   };
 
   if (!detailsId) return null;
-  if (loading) return <p>Loading details...</p>;
-  if (!character) return <p>No data</p>;
+  if (isLoading) return <p>Loading details...</p>;
+  if (isError || !data) return <p>No data</p>;
 
   return (
     <div className="item-details" data-testid="item-details">
       <button className="button-close" onClick={closeDetails}>
         ✖
       </button>
-
-      <h2>{character.name}</h2>
-      <img src={character.image} alt={character.name} />
+      <h2>{data.name}</h2>
+      <img src={data.image} alt={data.name} />
       <p>
-        <strong>Species:</strong> {character.species}
+        <strong>Species:</strong> {data.species}
       </p>
       <p>
-        <strong>Type:</strong> {character.type || 'N/A'}
+        <strong>Type:</strong> {data.type || 'N/A'}
       </p>
     </div>
   );
