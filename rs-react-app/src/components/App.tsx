@@ -1,103 +1,127 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import SearchInput from './SearchInput/SearchInput';
 import ItemList from './ItemList/ItemList';
 import Loader from './Loader/Loader';
 import ErrorDescription from './ErrorDescription/ErrorDescription';
 import Pagination from './Pagination/Pagination';
-import useCharacters from '../hooks/useCharacters';
 import ItemDetails from './Item/ItemDetails';
 import SelectedPanel from './SelectedPanel/SelectedPanel';
 
-const API_BASE_URL = 'https://rickandmortyapi.com/api/character/';
+import {
+  useGetCharactersQuery,
+  useInvalidateCharactersMutation,
+} from '../state/charactersApi';
+import useLastQuery from '../hooks/useLastQuery';
 
 const App: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const pageFromUrl = Number(searchParams.get('page')) || 1;
-  const detailsId = searchParams.get('details');
-
   const {
-    results,
-    currentQuery,
-    setCurrentQuery,
-    nextPageUrl,
-    prevPageUrl,
-    page,
-    totalPages,
-    loading,
-    error,
-    search,
-    loadPage,
-    loadLastQuery,
-    hasLastQuery,
-  } = useCharacters();
+    saveQuery,
+    loadQuery: loadLastQuery,
+    hasQuery: hasLastQuery,
+  } = useLastQuery();
 
-  // Загрузка результатов поиска
+  // Состояние текущего запроса (поиска)
+  const [currentQuery, setCurrentQuery] = useState(() =>
+    hasLastQuery() ? loadLastQuery() : ''
+  );
+
+  const [inputValue, setInputValue] = useState(currentQuery);
+
+  // Номер страницы из URL или 1 по умолчанию
+  const pageFromUrl = Number(searchParams.get('page')) || 1;
+
+  // RTK Query: данные по текущему запросу и странице
+  const { data, error, isLoading, isFetching, refetch } = useGetCharactersQuery(
+    { name: currentQuery, page: pageFromUrl }
+  );
+
+  const [invalidateCache] = useInvalidateCharactersMutation();
+
+  // При изменении currentQuery сохраняем его в useLastQuery
   useEffect(() => {
-    if (hasLastQuery()) {
-      const last = loadLastQuery();
-      setCurrentQuery(last);
-      const url = `${API_BASE_URL}?name=${encodeURIComponent(last)}&page=${pageFromUrl}`;
-      loadPage(url, pageFromUrl);
-    } else {
-      search('');
-    }
-  }, [
-    hasLastQuery,
-    loadLastQuery,
-    search,
-    setCurrentQuery,
-    loadPage,
-    pageFromUrl,
-  ]);
+    saveQuery(currentQuery);
+  }, [currentQuery, saveQuery]);
 
-  // Обработка пагинации
+  // Обработчик поиска:
+  // - обновляет currentQuery
+  // - сбрасывает страницу в 1 в URL
+  const handleSearch = (q: string) => {
+    setCurrentQuery(q);
+    searchParams.set('page', '1');
+    setSearchParams(searchParams);
+  };
+
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
+  };
+
+  // Обработчики пагинации меняют только page в URL
   const handleNextPage = () => {
-    if (nextPageUrl) {
-      loadPage(nextPageUrl, page + 1);
-      searchParams.set('page', String(page + 1));
+    if (data?.info.next) {
+      searchParams.set('page', String(pageFromUrl + 1));
       setSearchParams(searchParams);
     }
   };
 
   const handlePrevPage = () => {
-    if (prevPageUrl) {
-      loadPage(prevPageUrl, page - 1);
-      searchParams.set('page', String(page - 1));
+    if (data?.info.prev) {
+      searchParams.set('page', String(pageFromUrl - 1));
       setSearchParams(searchParams);
     }
   };
 
+  // Получаем id детали из URL
+  const detailsId = searchParams.get('details') || undefined;
+
   return (
     <div className="wrapper-main">
       <SearchInput
-        onSearch={search}
-        value={currentQuery}
-        onChange={setCurrentQuery}
+        onSearch={() => handleSearch(inputValue)}
+        value={inputValue}
+        onChange={handleInputChange}
       />
+      <button
+        onClick={() => {
+          invalidateCache(undefined);
+          refetch();
+        }}
+      >
+        Refresh
+      </button>
 
       <div className="main-content">
-        {/* Левая часть — список результатов */}
-        <Loader loading={loading} />
-        {!loading && results.length > 0 && (
-          <>
-            <div className="content">
-              <ItemList results={results} />
-              {/* Правая часть — детали, если выбран элемент */}
-              {detailsId && <ItemDetails />}
-            </div>
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              hasPrev={!!prevPageUrl}
-              hasNext={!!nextPageUrl}
-              onPrev={handlePrevPage}
-              onNext={handleNextPage}
-            />
-          </>
+        <Loader loading={isLoading || isFetching} />
+
+        {error ? (
+          <ErrorDescription
+            message={
+              'status' in error
+                ? `Ошибка: ${error.status}`
+                : (error?.message ?? 'Неизвестная ошибка')
+            }
+          />
+        ) : isLoading || isFetching ? null : (
+          data?.results?.length && (
+            <>
+              <div className="content">
+                <ItemList results={data.results} />
+                {detailsId && <ItemDetails />}
+              </div>
+
+              <Pagination
+                page={pageFromUrl}
+                totalPages={data.info.pages}
+                hasPrev={!!data.info.prev}
+                hasNext={!!data.info.next}
+                onPrev={handlePrevPage}
+                onNext={handleNextPage}
+              />
+            </>
+          )
         )}
-        {error && <ErrorDescription message={error} />}
+
         <SelectedPanel />
       </div>
     </div>

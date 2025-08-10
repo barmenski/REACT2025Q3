@@ -5,37 +5,24 @@ import { configureStore } from '@reduxjs/toolkit';
 import { itemsReducer } from '../src/state/itemsSlice';
 import App from '../src/components/App';
 import { vi, describe, it, beforeEach } from 'vitest';
-import { act } from 'react-dom/test-utils';
 import { ThemeProvider } from '../src/context/ThemeContext';
 
-// 🧪 Мокаем useCharacters
-import * as useCharactersModule from '../src/hooks/useCharacters';
-vi.mock('../src/hooks/useCharacters');
-const mockedUseCharacters = useCharactersModule.default as ReturnType<
-  typeof vi.fn
->;
+// Мокаем RTK Query хуки
+vi.mock('../src/state/charactersApi', () => ({
+  useGetCharactersQuery: vi.fn(),
+  useInvalidateCharactersMutation: vi.fn(),
+}));
 
-// 🧪 Мокаем дочерние компоненты
+import {
+  useGetCharactersQuery,
+  useInvalidateCharactersMutation,
+} from '../src/state/charactersApi';
+
+// Мокаем дочерние компоненты (по желанию)
 vi.mock('../src/components/Item/ItemDetails', () => ({
   __esModule: true,
   default: () => <div data-testid="item-details">Details shown</div>,
 }));
-
-it('handles item click and sets details param', async () => {
-  mockedUseCharacters.mockReturnValue(baseHookResult);
-
-  renderAppWithProviders('/?page=1');
-
-  // клик по кнопке
-  await act(async () => {
-    fireEvent.click(await screen.findByText('Rick Sanchez'));
-  });
-
-  // Ожидаем появления панели деталей
-  await waitFor(() => {
-    expect(screen.getByTestId('item-details')).toBeInTheDocument();
-  });
-});
 
 vi.mock('../src/components/Loader/Loader', () => ({
   __esModule: true,
@@ -50,15 +37,27 @@ vi.mock('../src/components/ErrorDescription/ErrorDescription', () => ({
 
 vi.mock('../src/components/SearchInput/SearchInput', () => ({
   __esModule: true,
-  default: ({ onSearch }: { onSearch: (query: string) => void }) => (
+  default: ({
+    onSearch,
+    value,
+    onChange,
+  }: {
+    onSearch: () => void;
+    value: string;
+    onChange: (v: string) => void;
+  }) => (
     <input
       data-testid="search-input"
-      onChange={(e) => onSearch(e.target.value)}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') onSearch();
+      }}
     />
   ),
 }));
 
-// 🧪 Вспомогательная функция для рендера с Redux и Router
+// Хелпер для рендера
 const renderAppWithProviders = (initialRoute = '/?page=1') => {
   const store = configureStore({
     reducer: {
@@ -79,38 +78,39 @@ const renderAppWithProviders = (initialRoute = '/?page=1') => {
   );
 };
 
-// 🧪 Общие данные useCharacters
-const baseHookResult = {
-  results: [
-    {
-      id: 1,
-      name: 'Rick Sanchez',
-      image: 'some.png',
-      species: 'rick',
-      type: 'rick',
-    },
-  ],
-  currentQuery: '',
-  setCurrentQuery: vi.fn(),
-  nextPageUrl: 'next-url',
-  prevPageUrl: null,
-  page: 1,
-  totalPages: 2,
-  loading: false,
-  error: '',
-  search: vi.fn(),
-  loadPage: vi.fn(),
-  loadLastQuery: () => 'Rick',
-  hasLastQuery: () => true,
-};
-
 describe('App component', () => {
+  const mockInvalidate = vi.fn();
+
   beforeEach(() => {
-    mockedUseCharacters.mockReset();
+    vi.resetAllMocks();
+    (useInvalidateCharactersMutation as unknown as jest.Mock).mockReturnValue([
+      mockInvalidate,
+    ]);
   });
 
   it('renders item list and pagination', async () => {
-    mockedUseCharacters.mockReturnValue(baseHookResult);
+    (useGetCharactersQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        results: [
+          {
+            id: 1,
+            name: 'Rick Sanchez',
+            image: 'some.png',
+            species: 'Human',
+            type: 'Scientist',
+          },
+        ],
+        info: {
+          pages: 2,
+          next: 'next-url',
+          prev: null,
+        },
+      },
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    });
 
     renderAppWithProviders('/?page=1');
 
@@ -121,7 +121,28 @@ describe('App component', () => {
   });
 
   it('displays details panel when "details" param exists', async () => {
-    mockedUseCharacters.mockReturnValue(baseHookResult);
+    (useGetCharactersQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        results: [
+          {
+            id: 1,
+            name: 'Rick Sanchez',
+            image: 'some.png',
+            species: 'Human',
+            type: 'Scientist',
+          },
+        ],
+        info: {
+          pages: 1,
+          next: null,
+          prev: null,
+        },
+      },
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    });
 
     renderAppWithProviders('/?page=1&details=1');
 
@@ -129,7 +150,28 @@ describe('App component', () => {
   });
 
   it('handles item click and sets details param', async () => {
-    mockedUseCharacters.mockReturnValue(baseHookResult);
+    (useGetCharactersQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        results: [
+          {
+            id: 1,
+            name: 'Rick Sanchez',
+            image: 'some.png',
+            species: 'Human',
+            type: 'Scientist',
+          },
+        ],
+        info: {
+          pages: 1,
+          next: null,
+          prev: null,
+        },
+      },
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    });
 
     renderAppWithProviders('/?page=1');
 
@@ -140,11 +182,13 @@ describe('App component', () => {
     });
   });
 
-  it('shows error message when error occurs', () => {
-    mockedUseCharacters.mockReturnValue({
-      ...baseHookResult,
-      results: [],
-      error: 'Something went wrong',
+  it('shows error message when error occurs', async () => {
+    (useGetCharactersQuery as unknown as jest.Mock).mockReturnValue({
+      data: undefined,
+      error: { message: 'Something went wrong' },
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
     });
 
     renderAppWithProviders('/');

@@ -1,54 +1,24 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import ItemDetails from '../src/components/Item/ItemDetails';
+import { useGetCharacterByIdQuery } from '../src/state/charactersApi';
 
-// Универсальный мок для успешного fetch
-function mockFetchSuccess(data: unknown) {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(data),
-      } as Response)
-    ) as typeof fetch
-  );
-}
-
-// Универсальный мок для ошибки fetch
-function mockFetchFailure() {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(() => Promise.reject(new Error('fail'))) as typeof fetch
-  );
-}
+vi.mock('../src/state/charactersApi', () => ({
+  useGetCharacterByIdQuery: vi.fn(),
+}));
 
 describe('ItemDetails', () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
 
-  it('renders nothing if no "details" param is present', () => {
-    render(
-      <MemoryRouter>
-        <ItemDetails />
-      </MemoryRouter>
-    );
-
-    expect(screen.queryByTestId('item-details')).toBeNull();
-  });
-
-  it('renders loading state and then character data', async () => {
-    const mockCharacter = {
-      id: 1,
-      name: 'Rick Sanchez',
-      image: 'rick.png',
-      species: 'Human',
-      type: 'Scientist',
-    };
-
-    mockFetchSuccess(mockCharacter);
+  it('renders loading state', () => {
+    (useGetCharacterByIdQuery as Mock).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+    });
 
     render(
       <MemoryRouter initialEntries={['/?details=1']}>
@@ -56,10 +26,28 @@ describe('ItemDetails', () => {
       </MemoryRouter>
     );
 
-    // Проверяем состояние загрузки
     expect(screen.getByText(/Loading details/)).toBeInTheDocument();
+  });
 
-    // Ждем появления данных персонажа
+  it('renders character data after loading', async () => {
+    (useGetCharacterByIdQuery as Mock).mockReturnValue({
+      data: {
+        id: 1,
+        name: 'Rick Sanchez',
+        image: 'rick.png',
+        species: 'Human',
+        type: 'Scientist',
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/?details=1']}>
+        <ItemDetails />
+      </MemoryRouter>
+    );
+
     await waitFor(() => {
       expect(screen.getByTestId('item-details')).toBeInTheDocument();
     });
@@ -70,8 +58,28 @@ describe('ItemDetails', () => {
     expect(screen.getByAltText('Rick Sanchez')).toBeInTheDocument();
   });
 
-  it('shows "No data" when fetch fails', async () => {
-    mockFetchFailure();
+  it('renders nothing if no "details" param is present', () => {
+    (useGetCharacterByIdQuery as Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+    });
+
+    render(
+      <MemoryRouter>
+        <ItemDetails />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByTestId('item-details')).toBeNull();
+  });
+
+  it('shows "No data" when fetch fails', () => {
+    (useGetCharacterByIdQuery as Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    });
 
     render(
       <MemoryRouter initialEntries={['/?details=999']}>
@@ -79,25 +87,21 @@ describe('ItemDetails', () => {
       </MemoryRouter>
     );
 
-    // Проверяем состояние загрузки
-    expect(screen.getByText(/Loading details/)).toBeInTheDocument();
-
-    // Ждем появления сообщения "No data"
-    await waitFor(() => {
-      expect(screen.getByText('No data')).toBeInTheDocument();
-    });
+    expect(screen.getByText('No data')).toBeInTheDocument();
   });
 
   it('removes "details" param when close button is clicked', async () => {
-    const mockCharacter = {
-      id: 1,
-      name: 'Morty Smith',
-      image: 'morty.png',
-      species: 'Human',
-      type: '',
-    };
-
-    mockFetchSuccess(mockCharacter);
+    (useGetCharacterByIdQuery as Mock).mockReturnValue({
+      data: {
+        id: 2,
+        name: 'Morty Smith',
+        image: 'morty.png',
+        species: 'Human',
+        type: '',
+      },
+      isLoading: false,
+      isError: false,
+    });
 
     render(
       <MemoryRouter initialEntries={['/?details=2']}>
@@ -105,7 +109,6 @@ describe('ItemDetails', () => {
       </MemoryRouter>
     );
 
-    // Ждем появления данных персонажа
     await waitFor(() => {
       expect(screen.getByText('Morty Smith')).toBeInTheDocument();
     });
@@ -113,7 +116,6 @@ describe('ItemDetails', () => {
     const closeBtn = screen.getByRole('button', { name: /✖/ });
     closeBtn.click();
 
-    // Ожидаем, что компонент будет размонтирован (details param удалён)
     await waitFor(() => {
       expect(screen.queryByTestId('item-details')).not.toBeInTheDocument();
     });

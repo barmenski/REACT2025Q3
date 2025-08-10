@@ -1,10 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { itemsReducer } from './itemsSlice';
+import { charactersApi } from './charactersApi';
 
 export const store = configureStore({
   reducer: {
     checkedItems: itemsReducer,
+    [charactersApi.reducerPath]: charactersApi.reducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(charactersApi.middleware),
 });
 
 store.subscribe(() => {
