@@ -1,31 +1,34 @@
-import { Outlet, NavLink } from 'react-router';
-import Header from '../Header/Header';
-import ThemeToggle from '../ThemeToggle/ThemeToggle';
+'use client'
 
-const Layout = () => (
-  <div className="wrapper-main">
-    <Header />
-    <ThemeToggle />
-    <div className="wrapper-nav-link">
-      <NavLink
-        to="/"
-        className={({ isActive }) =>
-          isActive ? 'nav-link active' : 'nav-link'
-        }
-      >
-        Home
-      </NavLink>
-      <NavLink
-        to="/about"
-        className={({ isActive }) =>
-          isActive ? 'nav-link active' : 'nav-link'
-        }
-      >
-        About
-      </NavLink>
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import Header from '../Header/Header'
+import ThemeToggle from '../ThemeToggle/ThemeToggle'
+
+const Layout = ({ children }: { children: React.ReactNode }) => {
+  const pathname = usePathname()
+
+  return (
+    <div className="wrapper-main">
+      <Header />
+      <ThemeToggle />
+      <div className="wrapper-nav-link">
+        <Link
+          href="/"
+          className={pathname === '/' ? 'nav-link active' : 'nav-link'}
+        >
+          Home
+        </Link>
+        <Link
+          href="/about"
+          className={pathname === '/about' ? 'nav-link active' : 'nav-link'}
+        >
+          About
+        </Link>
+      </div>
+      {children}
     </div>
-    <Outlet />
-  </div>
-);
+  )
+}
 
-export default Layout;
+export default Layout

@@ -14,7 +14,7 @@ export default function Item({ item }: { item: Character }) {
   const handleChange = () => {
     dispatch(toggleCharacter(item));
   };
-  // Обработка клика по элементу
+
   const handleItemClick = (id: number) => {
     searchParams.set('details', String(id));
     setSearchParams(searchParams);
