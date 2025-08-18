@@ -1,10 +1,12 @@
-import { useSearchParams } from 'react-router';
+import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks';
 import { toggleCharacter } from '../../state/itemsSlice';
 import type { Character } from '../../types';
 
 export default function Item({ item }: { item: Character }) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
 
   const dispatch = useAppDispatch();
   const selected = useAppSelector(
@@ -16,8 +18,10 @@ export default function Item({ item }: { item: Character }) {
   };
 
   const handleItemClick = (id: number) => {
-    searchParams.set('details', String(id));
-    setSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams);
+    params.set('details', String(id));
+    replace(`${pathname}?${params.toString()}`);
+    // setSearchParams(searchParams);
   };
 
   return (

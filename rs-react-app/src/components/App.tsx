@@ -1,5 +1,7 @@
+'use client'
+
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import SearchInput from './SearchInput/SearchInput';
 import ItemList from './ItemList/ItemList';
 import Loader from './Loader/Loader';
@@ -15,7 +17,7 @@ import {
 import useLastQuery from '../hooks/useLastQuery';
 
 const App: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const {
     saveQuery,
     loadQuery: loadLastQuery,
@@ -27,7 +29,10 @@ const App: React.FC = () => {
   );
 
   const [inputValue, setInputValue] = useState(currentQuery);
+  const pathname = usePathname();
+  const { replace } = useRouter();
 
+  // const pageFromUrl = Number(searchParams.get('page')) || 1;
   const pageFromUrl = Number(searchParams.get('page')) || 1;
 
   const { data, error, isLoading, isFetching, refetch } = useGetCharactersQuery(
@@ -41,9 +46,10 @@ const App: React.FC = () => {
   }, [currentQuery, saveQuery]);
 
   const handleSearch = (q: string) => {
+    const params = new URLSearchParams(searchParams);
     setCurrentQuery(q);
-    searchParams.set('page', '1');
-    setSearchParams(searchParams);
+    params.set('page', '1');
+    replace(`${pathname}?${params.toString()}`);
   };
 
   const handleInputChange = (value: string) => {
@@ -51,16 +57,20 @@ const App: React.FC = () => {
   };
 
   const handleNextPage = () => {
+    const params = new URLSearchParams(searchParams);
     if (data?.info.next) {
-      searchParams.set('page', String(pageFromUrl + 1));
-      setSearchParams(searchParams);
+      params.set('page', String(pageFromUrl + 1));
+      replace(`${pathname}?${params.toString()}`);
+      // setSearchParams(searchParams);
     }
   };
 
   const handlePrevPage = () => {
+    const params = new URLSearchParams(searchParams);
     if (data?.info.prev) {
-      searchParams.set('page', String(pageFromUrl - 1));
-      setSearchParams(searchParams);
+      params.set('page', String(pageFromUrl - 1));
+      replace(`${pathname}?${params.toString()}`);
+      // setSearchParams(searchParams);
     }
   };
 

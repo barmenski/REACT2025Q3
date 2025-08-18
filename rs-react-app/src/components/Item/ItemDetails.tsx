@@ -1,8 +1,10 @@
-import { useSearchParams } from 'react-router';
+import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { useGetCharacterByIdQuery } from '../../state/charactersApi';
 
 export default function ItemDetails() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
   const detailsId = searchParams.get('details');
   const idNum = detailsId ? parseInt(detailsId, 10) : undefined;
 
@@ -14,8 +16,10 @@ export default function ItemDetails() {
   );
 
   const closeDetails = () => {
-    searchParams.delete('details');
-    setSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams);
+    params.delete('details');
+    replace(`${pathname}?${params.toString()}`);
+    // setSearchParams(searchParams);
   };
 
   if (!detailsId) return null;
