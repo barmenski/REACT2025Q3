@@ -100,7 +100,7 @@ button:focus-visible {
 }
 
 .logo {
-  width: 60%;
+  width: auto;
 }
 
 .wrapper-item-list {

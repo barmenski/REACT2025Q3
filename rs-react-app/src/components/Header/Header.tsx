@@ -1,5 +1,7 @@
-import Logo from '../../assets/rick_and_morty_logo.png';
+import Image from 'next/image'
 
 export default function Header() {
-  return <img className="logo" src={Logo} alt={'Logo'} />;
+  return (
+  <Image className="logo" src="/rick_and_morty_logo.png" alt="Logo" width={622} height={202}/>
+  )
 }

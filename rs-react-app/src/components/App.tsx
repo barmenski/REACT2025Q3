@@ -1,5 +1,7 @@
+'use client'
+
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import SearchInput from './SearchInput/SearchInput';
 import ItemList from './ItemList/ItemList';
 import Loader from './Loader/Loader';
@@ -15,64 +17,63 @@ import {
 import useLastQuery from '../hooks/useLastQuery';
 
 const App: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const {
     saveQuery,
     loadQuery: loadLastQuery,
     hasQuery: hasLastQuery,
   } = useLastQuery();
 
-  // Состояние текущего запроса (поиска)
   const [currentQuery, setCurrentQuery] = useState(() =>
     hasLastQuery() ? loadLastQuery() : ''
   );
 
   const [inputValue, setInputValue] = useState(currentQuery);
+  const pathname = usePathname();
+  const { replace } = useRouter();
 
-  // Номер страницы из URL или 1 по умолчанию
+  // const pageFromUrl = Number(searchParams.get('page')) || 1;
   const pageFromUrl = Number(searchParams.get('page')) || 1;
 
-  // RTK Query: данные по текущему запросу и странице
   const { data, error, isLoading, isFetching, refetch } = useGetCharactersQuery(
     { name: currentQuery, page: pageFromUrl }
   );
 
   const [invalidateCache] = useInvalidateCharactersMutation();
 
-  // При изменении currentQuery сохраняем его в useLastQuery
   useEffect(() => {
     saveQuery(currentQuery);
   }, [currentQuery, saveQuery]);
 
-  // Обработчик поиска:
-  // - обновляет currentQuery
-  // - сбрасывает страницу в 1 в URL
   const handleSearch = (q: string) => {
+    const params = new URLSearchParams(searchParams);
     setCurrentQuery(q);
-    searchParams.set('page', '1');
-    setSearchParams(searchParams);
+    params.set('page', '1');
+    replace(`${pathname}?${params.toString()}`);
   };
 
   const handleInputChange = (value: string) => {
     setInputValue(value);
   };
 
-  // Обработчики пагинации меняют только page в URL
   const handleNextPage = () => {
+    const params = new URLSearchParams(searchParams);
     if (data?.info.next) {
-      searchParams.set('page', String(pageFromUrl + 1));
-      setSearchParams(searchParams);
+      params.set('page', String(pageFromUrl + 1));
+      replace(`${pathname}?${params.toString()}`);
+      // setSearchParams(searchParams);
     }
   };
 
   const handlePrevPage = () => {
+    const params = new URLSearchParams(searchParams);
     if (data?.info.prev) {
-      searchParams.set('page', String(pageFromUrl - 1));
-      setSearchParams(searchParams);
+      params.set('page', String(pageFromUrl - 1));
+      replace(`${pathname}?${params.toString()}`);
+      // setSearchParams(searchParams);
     }
   };
 
-  // Получаем id детали из URL
   const detailsId = searchParams.get('details') || undefined;
 
   return (

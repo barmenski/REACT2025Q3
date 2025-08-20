@@ -1,3 +1,5 @@
+'use client'
+
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { Character } from '../types';
 
@@ -17,7 +19,19 @@ const loadFromLocalStorage = (): SelectedState => {
   return { items: {} };
 };
 
-const initialState: SelectedState = loadFromLocalStorage();
+// let initialState: SelectedState = {
+//   items: [],
+// }
+// const loadFromLocalStorage = (): SelectedState => {
+//   if (typeof window === 'undefined') return initialState  // сервер
+//   try {
+//     const data = localStorage.getItem('selectedCharacters')
+//     if (data) return JSON.parse(data)
+//   } catch {}
+//   return initialState
+// }
+
+const initialState = loadFromLocalStorage();
 
 const itemsSlice = createSlice({
   name: 'checkedItems',
