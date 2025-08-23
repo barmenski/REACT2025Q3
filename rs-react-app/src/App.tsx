@@ -1,35 +1,48 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import Header from './components/Header'
+import UncontrolledForm from './components/UncontrolledForm'
+import Modal from './components/Modal';
+import HookForm from './components/ControlledForm';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App: React.FC = () => {
+  const [openModal, setOpenModal] = useState<"none" | "uncontrolled" | "hook">(
+    "none"
+  );
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <div className="wrapper">
+      <Header />
+
+      <div className="wrapper-button">
+        <button
+          onClick={() => setOpenModal("uncontrolled")}
+
+        >
+          Open Uncontrolled Form
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+        <button
+          onClick={() => setOpenModal("hook")}
+
+        >
+          Open Hook Form
+        </button>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+
+      <Modal
+        isOpen={openModal === "uncontrolled"}
+        onClose={() => setOpenModal("none")}
+      >
+        <UncontrolledForm />
+      </Modal>
+
+      <Modal
+        isOpen={openModal === "hook"}
+        onClose={() => setOpenModal("none")}
+      >
+        <HookForm />
+      </Modal>
+    </div>
+  );
+};
 
 export default App
