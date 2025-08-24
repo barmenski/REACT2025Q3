@@ -1,8 +1,8 @@
-function Header () {
-    return (
-        <header>
-            <h1>Forms</h1>
-        </header>
-    )
+function Header() {
+  return (
+    <header>
+      <h1>Forms</h1>
+    </header>
+  );
 }
-export default  Header;
+export default Header;

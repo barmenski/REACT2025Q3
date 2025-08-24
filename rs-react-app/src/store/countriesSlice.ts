@@ -1,4 +1,4 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface Country {
   code: string;
@@ -11,14 +11,14 @@ interface CountriesState {
 
 const initialState: CountriesState = {
   list: [
-    { code: "US", name: "United States" },
-    { code: "CA", name: "Canada" },
-    { code: "GB", name: "United Kingdom" },
+    { code: 'US', name: 'United States' },
+    { code: 'CA', name: 'Canada' },
+    { code: 'GB', name: 'United Kingdom' },
   ],
 };
 
 const countriesSlice = createSlice({
-  name: "countries",
+  name: 'countries',
   initialState,
   reducers: {
     setCountries(state, action: PayloadAction<Country[]>) {
