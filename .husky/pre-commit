@@ -1,2 +1,1 @@
-cd rs-react-app
-npm run lint
+npm --prefix rs-react-app run lint
