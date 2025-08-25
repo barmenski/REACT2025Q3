@@ -164,7 +164,7 @@ function UncontrolledForm({ onSuccess }: UncontrolledFormProps) {
   };
 
   return (
-    <form className="wrapper-form" onSubmit={handleSubmit}>
+    <form className="wrapper-form" onSubmit={handleSubmit} data-testid="uncontrolled-form">
       <h2 className="header-form">Uncontrolled Form</h2>
       <ul className="list-inputs">
         <li>

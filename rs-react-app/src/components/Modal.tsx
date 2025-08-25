@@ -40,7 +40,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
 
   return ReactDOM.createPortal(
-    <div className="modalBackground">
+    <div className="modalBackground" data-testid="modal-background">
       <div ref={modalRef} className="modalActive">
         <button onClick={onClose} className="cross">
           ✕
