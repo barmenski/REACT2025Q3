@@ -247,13 +247,40 @@ button:hover {
   font-size: small;
 }
 
+.wrapper-tile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.wrapper-tile img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.tile-info {
+  flex: 1 1 0%;
+}
+
+.tile-info h3 {
+  margin: 0px 0px 0.5rem;
+  color: rgb(51, 51, 51);
+}
+
+.tile-info p {
+  margin: 0.25rem 0px;
+  color: rgb(102, 102, 102);
+}
+
 .form-data-tile {
   border: 1px solid #ddd;
   padding: 1rem;
   margin: 1rem 0;
   border-radius: 8px;
   background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.5s ease;
 }
 
@@ -267,9 +294,11 @@ button:hover {
   0% {
     box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
   }
+
   70% {
     box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
   }
@@ -297,7 +326,7 @@ button:hover {
 }
 
 .wrapper-submissions {
-  padding: 2rem; 
+  padding: 2rem;
   max-width: 800px;
   margin: 0 auto;
 }
