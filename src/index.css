@@ -66,3 +66,53 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.countries-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #999;
+  font-family: Arial, sans-serif;
+}
+
+.countries-table th,
+.countries-table td {
+  border: 1px solid #bbb;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.countries-table thead {
+  background-color: #f3f3f3;
+}
+
+.row-main {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.row-main:hover {
+  background-color: #eaeaea;
+}
+
+.row-expanded {
+  background-color: #fafafa;
+  padding: 8px;
+}
+
+.sub-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+  background-color: #fff;
+}
+
+.sub-table th,
+.sub-table td {
+  border: 1px solid #ccc;
+  padding: 4px 8px;
+  text-align: left;
+}
+
+.sub-table thead {
+  background-color: #e0e0e0;
+}
