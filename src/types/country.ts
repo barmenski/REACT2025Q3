@@ -1,4 +1,4 @@
-export interface YearData {
+export type YearData = {
   year: number;
   population?: number;
   cement_co2?: number;
@@ -30,11 +30,11 @@ export interface YearData {
   temperature_change_from_co2?: number;
   temperature_change_from_ghg?: number;
   temperature_change_from_n2o?: number;
-}
+};
 
-export interface CountryData {
+export type CountryData = {
   iso_code?: string;
   data: YearData[];
-}
+};
 
 export type CountriesData = Record<string, CountryData>;

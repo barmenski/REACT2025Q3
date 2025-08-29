@@ -1,9 +1,9 @@
-import { Suspense, useMemo } from 'react';
+import { Suspense } from 'react';
 import { Loader } from './components/Loader';
 import CountryTable from './components/CountryTable';
 import { getCountryResource } from './utils/countryResource';
 
-function CountryListWrapper({
+function CountryTableWrapper({
   resource,
 }: {
   resource: ReturnType<typeof getCountryResource>;
@@ -13,12 +13,12 @@ function CountryListWrapper({
 }
 
 function App() {
-  const countryResource = useMemo(() => getCountryResource(), []);
+  const countryResource = getCountryResource();
 
   return (
     <Suspense fallback={<Loader />}>
       <h1>CO₂ Data by Country</h1>
-      <CountryListWrapper resource={countryResource} />
+      <CountryTableWrapper resource={countryResource} />
     </Suspense>
   );
 }

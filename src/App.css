@@ -48,3 +48,42 @@
   text-align: center;
   margin: 2rem;
 }
+
+.countries-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  font-size: 14px;
+}
+
+.countries-table th,
+.countries-table td {
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.countries-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.country-name {
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 0;
+}
+
+.row-main {
+  cursor: pointer;
+}
+
+.row-expanded {
+  column-span: 3;
+}
+
+.control-panel {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+}
