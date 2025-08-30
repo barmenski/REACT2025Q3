@@ -37,4 +37,12 @@ export type CountryData = {
   data: YearData[];
 };
 
-export type CountriesData = Record<string, CountryData>;
+// export type CountriesData = Record<string, CountryData>;
+
+export type Countries = {
+  [country: string]: CountryData;
+};
+
+export type CountriesObj = {
+  countries: Countries;
+};

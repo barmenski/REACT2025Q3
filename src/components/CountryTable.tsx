@@ -1,31 +1,26 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import type { CountriesObj } from '../types/country';
+import Modal from './Modal';
+import { getAllColumns } from '../utils/allColumns';
 
-type YearData = {
-  year: number;
-  population?: number;
-  co2?: number;
-  co2_per_capita?: number;
-};
+const CountriesTable: React.FC<CountriesObj> = ({ countries }) => {
+  const allColumns = getAllColumns({ countries });
 
-type CountryData = {
-  iso_code?: string;
-  data: YearData[];
-};
+  const [selectedCols, setSelectedCols] = useState<string[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
 
-type Countries = {
-  [country: string]: CountryData;
-};
-
-type Props = {
-  countries: Countries;
-};
-
-const CountriesTable: React.FC<Props> = ({ countries }) => {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<number>(2023);
+  const [prevYear, setPrevYear] = useState<number | null>(null);
+  const [highlightedCells, setHighlightedCells] = useState<
+    Record<string, string[]>
+  >({});
+
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState<'name' | 'population'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  const visibleCols = useMemo(() => selectedCols, [selectedCols]);
 
   const toggleExpand = useCallback(
     (country: string) => {
@@ -60,15 +55,67 @@ const CountriesTable: React.FC<Props> = ({ countries }) => {
     return entries;
   }, [countries, search, sortField, sortOrder, selectedYear]);
 
+  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPrevYear(selectedYear);
+    setSelectedYear(Number(e.target.value));
+  };
+
+  useEffect(() => {
+    if (!prevYear) return;
+
+    const newHighlights: Record<string, string[]> = {};
+
+    Object.entries(countries).forEach(([country, info]) => {
+      const prevData = info.data.find((d) => d.year === prevYear);
+      const currData = info.data.find((d) => d.year === selectedYear);
+
+      if (!prevData || !currData) return;
+
+      const changed: string[] = [];
+
+      if (prevData.population !== currData.population) {
+        changed.push('population');
+      }
+
+      visibleCols.forEach((col) => {
+        if (
+          prevData[col as keyof typeof prevData] !==
+          currData[col as keyof typeof currData]
+        ) {
+          changed.push(col);
+        }
+      });
+
+      if (changed.length > 0) {
+        newHighlights[country] = changed;
+      }
+    });
+
+    setHighlightedCells(newHighlights);
+
+    const timer = setTimeout(() => setHighlightedCells({}), 1000);
+    return () => clearTimeout(timer);
+  }, [selectedYear]);
+
   return (
     <div>
+      <button onClick={() => setModalOpen(true)}>Выбрать колонки</button>
+
+      {modalOpen && (
+        <Modal
+          allColumns={allColumns}
+          selected={selectedCols}
+          onChange={setSelectedCols}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
       <div className="control-panel">
         <label>
           Year:{' '}
           <input
             type="number"
             value={selectedYear}
-            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            onChange={handleYearChange}
           />
         </label>
 
@@ -108,22 +155,55 @@ const CountriesTable: React.FC<Props> = ({ countries }) => {
             <th>Name</th>
             <th>Population ({selectedYear})</th>
             <th>ISO Code</th>
+            {visibleCols.map((col) => (
+              <th key={col}>{col}</th>
+            ))}
           </tr>
         </thead>
+
         <tbody>
           {filteredCountries.map(([country, info]) => {
             const yearData = info.data.find((d) => d.year === selectedYear);
+
             return (
               <React.Fragment key={country}>
                 <tr onClick={() => toggleExpand(country)} className="row-main">
                   <td>{country}</td>
-                  <td>{yearData?.population?.toLocaleString() || 'N/A'}</td>
+                  <td
+                    className={
+                      highlightedCells[country]?.includes('population')
+                        ? 'highlight'
+                        : ''
+                    }
+                  >
+                    {yearData?.population?.toLocaleString() || 'N/A'}
+                  </td>
                   <td>{info.iso_code || 'N/A'}</td>
+
+                  {visibleCols.map((col) => (
+                    <td
+                      key={col}
+                      className={
+                        highlightedCells[country]?.includes(col)
+                          ? 'highlight'
+                          : ''
+                      }
+                    >
+                      {yearData && col in yearData
+                        ? (
+                            yearData[col as keyof typeof yearData] ?? 'N/A'
+                          ).toString()
+                        : 'N/A'}
+                    </td>
+                  ))}
                 </tr>
 
                 {expanded === country && (
                   <tr>
-                    <td className="row-expanded" colSpan={3}>
+                    <td
+                      className="row-expanded"
+                      colSpan={visibleCols.length + 3}
+                    >
                       <table className="sub-table">
                         <thead>
                           <tr>
@@ -131,6 +211,9 @@ const CountriesTable: React.FC<Props> = ({ countries }) => {
                             <th>Population</th>
                             <th>CO₂</th>
                             <th>CO₂ per capita</th>
+                            {visibleCols.map((col) => (
+                              <th key={col}>{col}</th>
+                            ))}
                           </tr>
                         </thead>
                         <tbody>
@@ -144,6 +227,11 @@ const CountriesTable: React.FC<Props> = ({ countries }) => {
                                 </td>
                                 <td>{row.co2 ?? 'N/A'}</td>
                                 <td>{row.co2_per_capita ?? 'N/A'}</td>
+                                {visibleCols.map((col) => (
+                                  <td key={col}>
+                                    {row[col as keyof typeof row] ?? 'N/A'}
+                                  </td>
+                                ))}
                               </tr>
                             ))}
                         </tbody>
