@@ -1,14 +1,7 @@
+import React from 'react';
 import type { CountryData, YearData } from '../types/country';
 
-export const CountryRow = ({
-  country,
-  info,
-  yearData,
-  highlighted,
-  visibleCols,
-  expanded,
-  toggleExpand,
-}: {
+type CountryRowProps = {
   country: string;
   info: CountryData;
   yearData: YearData | undefined;
@@ -16,6 +9,16 @@ export const CountryRow = ({
   visibleCols: string[];
   expanded: boolean;
   toggleExpand: (c: string) => void;
+};
+
+const CountryRowComponent: React.FC<CountryRowProps> = ({
+  country,
+  info,
+  yearData,
+  highlighted,
+  visibleCols,
+  expanded,
+  toggleExpand,
 }) => (
   <>
     <tr onClick={() => toggleExpand(country)} className="row-main">
@@ -68,3 +71,6 @@ export const CountryRow = ({
     )}
   </>
 );
+
+export const CountryRow = React.memo(CountryRowComponent);
+CountryRow.displayName = 'CountryRow';
