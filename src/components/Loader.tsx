@@ -1,5 +1,5 @@
 export const Loader = () => (
   <div className="loader">
-    <span>Loading...</span>
+    <div className="dual-ring"></div>
   </div>
 );

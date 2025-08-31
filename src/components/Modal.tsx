@@ -29,7 +29,7 @@ export default function Modal({
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h3>Выберите дополнительные колонки</h3>
+        <h3>Select additional columns</h3>
         <div className="checkboxes">
           {allColumns.map((col) => (
             <label key={col}>
@@ -43,8 +43,8 @@ export default function Modal({
           ))}
         </div>
         <div className="actions">
-          <button onClick={apply}>Применить</button>
-          <button onClick={onClose}>Отмена</button>
+          <button onClick={apply}>Apply</button>
+          <button onClick={onClose}>Cancel</button>
         </div>
       </div>
     </div>

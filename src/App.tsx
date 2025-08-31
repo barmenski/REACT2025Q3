@@ -16,10 +16,12 @@ function App() {
   const countryResource = getCountryResource();
 
   return (
-    <Suspense fallback={<Loader />}>
+    <>
       <h1>CO₂ Data by Country</h1>
-      <CountryTableWrapper resource={countryResource} />
-    </Suspense>
+      <Suspense fallback={<Loader />}>
+        <CountryTableWrapper resource={countryResource} />
+      </Suspense>
+    </>
   );
 }
 
