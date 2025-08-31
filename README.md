@@ -31,7 +31,7 @@ Initial profiling was performed using **React DevTools Profiler**.
 ![Profiler Flame Graph](src/assets/flame-search-before.png)
 
 #### Ranked Chart for search
-![Profiler Ranked Chart](src/assets/ranked-search-before.PNG)
+![Profiler Ranked Chart](src/assets/ranked-search-before.png)
 
 ---
 
@@ -81,7 +81,7 @@ Initial profiling was performed using **React DevTools Profiler**.
 ![Profiler Flame Graph](src/assets/flame-search-after.png)
 
 #### Ranked Chart for search
-![Profiler Ranked Chart](src/assets/ranked-search-after.PNG)
+![Profiler Ranked Chart](src/assets/ranked-search-after.png)
 
 ---
 
