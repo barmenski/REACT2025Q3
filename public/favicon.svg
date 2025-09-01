@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>Yellow Handwritten 3</title>
+  <path d="M18,18
+           C28,8 50,10 46,24
+           C44,30 34,32 28,34
+           C34,36 44,38 46,44
+           C48,54 28,56 18,46"
+        fill="none"
+        stroke="#FFD400"
+        stroke-width="7"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+</svg>
